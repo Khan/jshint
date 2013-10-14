@@ -50141,6 +50141,25 @@ assert.AssertionError = function AssertionError(options) {
   if (Error.captureStackTrace) {
     Error.captureStackTrace(this, stackStartFunction);
   }
+  else {
+    // non v8 browsers so we can have a stacktrace
+    var err = new Error();
+    if (err.stack) {
+      var out = err.stack;
+
+      // try to strip useless frames
+      var fn_name = stackStartFunction.name;
+      var idx = out.indexOf('\n' + fn_name);
+      if (idx >= 0) {
+        // once we have located the function frame
+        // we need to strip out everything before it (and its line)
+        var next_line = out.indexOf('\n', idx + 1);
+        out = out.substring(next_line + 1);
+      }
+
+      this.stack = out;
+    }
+  }
 };
 
 // assert.AssertionError instanceof Error
@@ -50483,10 +50502,8 @@ EventEmitter.prototype.emit = function(type) {
       er = arguments[1];
       if (er instanceof Error) {
         throw er; // Unhandled 'error' event
-      } else {
-        throw TypeError('Uncaught, unspecified "error" event.');
       }
-      return false;
+      throw TypeError('Uncaught, unspecified "error" event.');
     }
   }
 
@@ -50571,7 +50588,10 @@ EventEmitter.prototype.addListener = function(type, listener) {
                     'leak detected. %d listeners added. ' +
                     'Use emitter.setMaxListeners() to increase limit.',
                     this._events[type].length);
-      console.trace();
+      if (typeof console.trace === 'function') {
+        // not supported in IE 10
+        console.trace();
+      }
     }
   }
 
@@ -50769,7 +50789,8 @@ process.nextTick = (function () {
     if (canPost) {
         var queue = [];
         window.addEventListener('message', function (ev) {
-            if (ev.source === window && ev.data === 'process-tick') {
+            var source = ev.source;
+            if ((source === window || source === null) && ev.data === 'process-tick') {
                 ev.stopPropagation();
                 if (queue.length > 0) {
                     var fn = queue.shift();
@@ -50794,6 +50815,16 @@ process.browser = true;
 process.env = {};
 process.argv = [];
 
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
 }
@@ -50812,7 +50843,8 @@ module.exports = function isBuffer(arg) {
     && typeof arg.readUInt8 === 'function';
 }
 },{}],9:[function(require,module,exports){
-var process=require("__browserify_process"),global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};// Copyright Joyent, Inc. and other Node contributors.
+(function (process,global){
+// Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
@@ -51399,8 +51431,10 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-},{"./support/isBuffer":8,"__browserify_process":7,"inherits":6}],10:[function(require,module,exports){
-var global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};/*global window, global*/
+}).call(this,require("FWaASH"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":8,"FWaASH":7,"inherits":6}],10:[function(require,module,exports){
+(function (global){
+/*global window, global*/
 var util = require("util")
 var assert = require("assert")
 
@@ -51486,6 +51520,7 @@ function assert(expression) {
     }
 }
 
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"assert":4,"util":9}],11:[function(require,module,exports){
 //     Underscore.js 1.4.4
 //     http://underscorejs.org
@@ -52714,7 +52749,7 @@ function assert(expression) {
 
 }).call(this);
 
-},{}],"nr+AlQ":[function(require,module,exports){
+},{}],"fNbQ4d":[function(require,module,exports){
 /*!
  * JSHint, by JSHint Community.
  *
@@ -57846,7 +57881,7 @@ if (typeof exports === "object" && exports) {
 }
 
 },{"./lex.js":14,"./messages.js":15,"./reg.js":16,"./state.js":17,"./style.js":18,"./vars.js":19,"console-browserify":10,"events":5,"underscore":11}],"jshint":[function(require,module,exports){
-module.exports=require('nr+AlQ');
+module.exports=require('fNbQ4d');
 },{}],14:[function(require,module,exports){
 /*
  * Lexical analysis and token construction.
@@ -60499,7 +60534,7 @@ exports.yui = {
 };
 
 
-},{}]},{},["nr+AlQ"])
+},{}]},{},["fNbQ4d"])
 JSHINT = require('jshint').JSHINT;
 if (typeof exports === 'object' && exports) exports.JSHINT = JSHINT;
 }());
