@@ -28,14 +28,14 @@ exports.other = function (test) {
 	];
 
 	TestRun(test)
-		.addError(1, "Unexpected '\\'.")
+		.addError(1, "Unexpected \"\\\".")
 		.addError(2, "Unexpected early end of program.")
-		.addError(2, "Expected an identifier and instead saw '(end)'.")
+		.addError(2, "I thought you were going to type an identifier but you typed '(end)'.")
 		.test(code, {es3: true});
 
 	// GH-818
 	TestRun(test)
-		.addError(1, "Expected an identifier and instead saw ')'.")
+		.addError(1, "I thought you were going to type an identifier but you typed ')'.")
 		.test("if (product < ) {}", {es3: true});
 
 	test.done();
@@ -105,11 +105,11 @@ exports.assignment = function (test) {
 	];
 
 	var run = TestRun(test)
-		.addError(2, "Bad assignment.")
-		.addError(3, "Bad assignment.")
-		.addError(10, "Bad assignment.")
-		.addError(10, "Expected an assignment or function call and instead saw an expression.")
-		.addError(10, "Missing semicolon.");
+		.addError(2, "The left side of an assignment must be a single variable name, not an expression.")
+		.addError(3, "The left side of an assignment must be a single variable name, not an expression.")
+		.addError(10, "The left side of an assignment must be a single variable name, not an expression.")
+		.addError(10, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(10, "It looks like you're missing a semicolon.");
 
 	run.test(code, { plusplus: true, es3: true });
 	run.test(code, { plusplus: true }); // es5
@@ -173,12 +173,12 @@ exports.options = function (test) {
 	var run = TestRun(test)
 		.addError(3, "Unexpected /*member 'c'.")
 		.addError(4, "Bad option: '++'.")
-		.addError(5, "Expected a small integer or 'false' and instead saw '0'.")
-		.addError(6, "Expected a small integer or 'false' and instead saw '-2'.")
-		.addError(7, "Expected a small integer or 'false' and instead saw '100.4'.")
-		.addError(8, "Expected a small integer or 'false' and instead saw '200.4'.")
-		.addError(9, "Expected a small integer or 'false' and instead saw '300.4'.")
-		.addError(10, "Expected a small integer or 'false' and instead saw '0'.")
+		.addError(5, "I thought you were going to type a number or 'false' but you typed '0'.")
+		.addError(6, "I thought you were going to type a number or 'false' but you typed '-2'.")
+		.addError(7, "I thought you were going to type a number or 'false' but you typed '100.4'.")
+		.addError(8, "I thought you were going to type a number or 'false' but you typed '200.4'.")
+		.addError(9, "I thought you were going to type a number or 'false' but you typed '300.4'.")
+		.addError(10, "I thought you were going to type a number or 'false' but you typed '0'.")
 		.addError(13, "Bad option: 'd'.")
 		.addError(14, "Bad option value.")
 		.addError(16, "Read only.");
@@ -200,10 +200,10 @@ exports.shebang = function (test) {
 	];
 
 	var run = TestRun(test)
-		.addError(3, "Expected an identifier and instead saw '#'.")
-		.addError(3, "Expected an operator and instead saw '!'.")
-		.addError(3, "Expected an assignment or function call and instead saw an expression.")
-		.addError(3, "Missing semicolon.");
+		.addError(3, "I thought you were going to type an identifier but you typed '#'.")
+		.addError(3, "I thought you were going to type an operator but you typed '!'.")
+		.addError(3, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(3, "It looks like you're missing a semicolon.");
 	run.test(code, {es3: true});
 	run.test(code, {}); // es5
 	run.test(code, {esnext: true});
@@ -240,11 +240,11 @@ exports.numbers = function (test) {
 
 	TestRun(test)
 		.addError(2, "Bad number '10e308'.")
-		.addError(5, "A leading decimal point can be confused with a dot: '.3'.")
-		.addError(6, "Unexpected '0'.")
-		.addError(7, "Expected an identifier and instead saw 'var'.")
-		.addError(7, "Missing semicolon.")
-		.addError(7, "Don't use extra leading zeros '0033'.")
+		.addError(5, "Please put a 0 in front of the decimal point: \".3\"!")
+		.addError(6, "Unexpected \"0\".")
+		.addError(7, "I thought you were going to type an identifier but you typed 'var'.")
+		.addError(7, "It looks like you're missing a semicolon.")
+		.addError(7, "Don't use extra leading zeros \"0033\".")
 		.addError(8, "A trailing decimal point can be confused with a dot: '3.'.")
 		.addError(9, "A dot following a number can be confused with a decimal point.")
 		.test(code, {es3: true});
@@ -261,8 +261,8 @@ exports.numbers = function (test) {
 
 	// GitHub #751 - an expression containing a number with a leading decimal point should be parsed in its entirety
 	TestRun(test)
-		.addError(1, "A leading decimal point can be confused with a dot: '.3'.")
-		.addError(2, "A leading decimal point can be confused with a dot: '.3'.")
+		.addError(1, "Please put a 0 in front of the decimal point: \".3\"!")
+		.addError(2, "Please put a 0 in front of the decimal point: \".3\"!")
 		.test([
 			"var a = .3 + 1;",
 			"var b = 1 + .3;",
@@ -280,8 +280,8 @@ exports.comments = function (test) {
 	];
 
 	var run = TestRun(test)
-		.addError(3, "Unbegun comment.")
-		.addError(4, "Unclosed comment.");
+		.addError(3, "It looks like you never started your comment. Use \"/*\" to start a multi-line comment.")
+		.addError(4, "It looks like your comment isn't closed. Use \"*/\" to end a multi-line comment.");
 	run.test(code, {es3: true});
 	run.test(code, {}); // es5
 	run.test(code, {esnext: true});
@@ -405,8 +405,8 @@ exports.strings = function (test) {
 		.addError(1, "Control character in string: <non-printable>.", {character: 10})
 		.addError(1, "This character may get silently deleted by one or more browsers.")
 		.addError(2, "Bad or unnecessary escaping.")
-		.addError(5, "Unclosed string.")
-		.addError(5, "Missing semicolon.");
+		.addError(5, "Unclosed string! Make sure you end your string with a quote.")
+		.addError(5, "It looks like you're missing a semicolon.");
 	run.test(code, {es3: true});
 	run.test(code, {}); // es5
 	run.test(code, {esnext: true});
@@ -450,7 +450,7 @@ exports.jsonMode = function (test) {
 	];
 
 	var run = TestRun(test)
-		.addError(2, "Expected a string and instead saw a.")
+		.addError(2, "I thought you were going to type a string but you typed a.")
 		.addError(3, "Strings must use doublequote.")
 		.addError(3, "Avoid \\v.")
 		.addError(3, "Avoid \\x-.")
@@ -472,22 +472,22 @@ exports.comma = function (test) {
 	var src = fs.readFileSync(__dirname + "/fixtures/comma.js", "utf8");
 
 	TestRun(test)
-		.addError(2, "Expected an assignment or function call and instead saw an expression.")
-		.addError(15, "Expected an assignment or function call and instead saw an expression.")
-		.addError(15, "Missing semicolon.")
-		.addError(20, "Expected an assignment or function call and instead saw an expression.")
-		.addError(30, "Expected an assignment or function call and instead saw an expression.")
-		.addError(35, "Expected an assignment or function call and instead saw an expression.")
-		.addError(35, "Missing semicolon.")
-		.addError(36, "Unexpected 'if'.")
-		.addError(43, "Expected an assignment or function call and instead saw an expression.")
-		.addError(43, "Missing semicolon.")
-		.addError(44, "Unexpected '}'.")
+		.addError(2, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(15, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(15, "It looks like you're missing a semicolon.")
+		.addError(20, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(30, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(35, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(35, "It looks like you're missing a semicolon.")
+		.addError(36, "Unexpected \"if\".")
+		.addError(43, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(43, "It looks like you're missing a semicolon.")
+		.addError(44, "Unexpected \"}\".")
 		.test(src, {es3: true});
 
 	// Regression test (GH-56)
 	TestRun(test)
-		.addError(4, "Expected an assignment or function call and instead saw an expression.")
+		.addError(4, "I thought you were going to type an assignment or function call but you typed an expression instead.")
 		.test(fs.readFileSync(__dirname + "/fixtures/gh56.js", "utf8"));
 
 	// Regression test (GH-363)
@@ -508,10 +508,10 @@ exports.withStatement = function (test) {
 
 	run = TestRun(test)
 		.addError(5, "Don't use 'with'.")
-		.addError(5, "Missing space after 'with'.")
+		.addError(5, "I think you're missing a space after \"with\".")
 		.addError(5, "Unexpected space after '('.")
 		.addError(13, "'with' is not allowed in strict mode.")
-		.addError(13, "Missing space after ')'.")
+		.addError(13, "I think you're missing a space after \")\".")
 		.addError(13, "Unexpected space after '2'.");
 	run.test(src, {white: true, es3: true});
 	run.test(src, {white: true}); // es5
@@ -519,10 +519,10 @@ exports.withStatement = function (test) {
 	run.test(src, {white: true, moz: true});
 
 	run = TestRun(test)
-		.addError(5, "Missing space after 'with'.")
+		.addError(5, "I think you're missing a space after \"with\".")
 		.addError(5, "Unexpected space after '('.")
 		.addError(13, "'with' is not allowed in strict mode.")
-		.addError(13, "Missing space after ')'.")
+		.addError(13, "I think you're missing a space after \")\".")
 		.addError(13, "Unexpected space after '2'.");
 	run.test(src, {white: true, withstmt: true, es3: true});
 	run.test(src, {white: true, withstmt: true}); // es5
@@ -536,8 +536,8 @@ exports.blocks = function (test) {
 	var src = fs.readFileSync(__dirname + "/fixtures/blocks.js", "utf8");
 
 	var run = TestRun(test)
-		.addError(29, "Unmatched \'{\'.")
-		.addError(31, "Unmatched \'{\'.");
+		.addError(29, "Unmatched \"{\".")
+		.addError(31, "Unmatched \"{\".");
 	run.test(src, {es3: true});
 	run.test(src, {}); // es5
 	run.test(src, {esnext: true});
@@ -650,15 +650,15 @@ exports["regression for GH-878"] = function (test) {
 exports["regression for GH-910"] = function (test) {
 	var src = "(function () { if (true) { foo.bar + } })();";
 	TestRun(test)
-		.addError(1, "Expected an identifier and instead saw '}'.")
-		.addError(1, "Expected an assignment or function call and instead saw an expression.")
-		.addError(1, "Missing semicolon.")
-		.addError(1, "Expected an identifier and instead saw ')'.")
-		.addError(1, "Expected an operator and instead saw '('.")
-		.addError(1, "Unmatched '{'.")
-		.addError(1, "Unmatched '('.")
-		.addError(1, "Expected an assignment or function call and instead saw an expression.")
-		.addError(1, "Missing semicolon.")
+		.addError(1, "I thought you were going to type an identifier but you typed '}'.")
+		.addError(1, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(1, "It looks like you're missing a semicolon.")
+		.addError(1, "I thought you were going to type an identifier but you typed ')'.")
+		.addError(1, "I thought you were going to type an operator but you typed '('.")
+		.addError(1, "Unmatched \"{\".")
+		.addError(1, "Unmatched \"(\".")
+		.addError(1, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(1, "It looks like you're missing a semicolon.")
 		.test(src, { es3: true, nonew: true });
 	test.done();
 };
@@ -666,10 +666,10 @@ exports["regression for GH-910"] = function (test) {
 exports.testHtml = function (test) {
 	var html = "<html><body>Hello World</body></html>";
 	TestRun(test)
-		.addError(1, "Expected an identifier and instead saw '<'.")
-		.addError(1, "Expected an assignment or function call and instead saw an expression.")
-		.addError(1, "Missing semicolon.")
-		.addError(1, "Expected an identifier and instead saw '<'.")
+		.addError(1, "I thought you were going to type an identifier but you typed '<'.")
+		.addError(1, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(1, "It looks like you're missing a semicolon.")
+		.addError(1, "I thought you were going to type an identifier but you typed '<'.")
 		.test(html, {});
 	test.done();
 };
@@ -700,23 +700,23 @@ exports["test: destructuring var in function scope"] = function (test) {
 		.addError(7,  "'c' is already defined.")
 		.addError(9,  "'a' is already defined.")
 		.addError(9,  "'bar' is already defined.")
-		.addError(10,  "Expected an identifier and instead saw '1'.")
-		.addError(10,  "Expected ',' and instead saw '1'.")
-		.addError(10,  "Expected an identifier and instead saw ']'.")
-		.addError(11, "Expected ',' and instead saw ';'.")
+		.addError(10,  "I thought you were going to type an identifier but you typed '1'.")
+		.addError(10,  "I thought you were going to type \",\" but you typed \"1\".")
+		.addError(10,  "I thought you were going to type an identifier but you typed ']'.")
+		.addError(11, "I thought you were going to type \",\" but you typed \";\".")
 		.addError(11, "'a' is already defined.")
 		.addError(11, "'b' is already defined.")
 		.addError(11, "'c' is already defined.")
 		.addError(12, "'a' is already defined.")
 		.addError(12, "'b' is already defined.")
 		.addError(12, "'c' is already defined.")
-		.addError(12, "Expected ']' to match '[' from line 12 and instead saw ';'.")
-		.addError(12, "Missing semicolon.")
-		.addError(12, "Expected an assignment or function call and instead saw an expression.")
-		.addError(12, "Missing semicolon.")
-		.addError(12, "Expected an identifier and instead saw ']'.")
-		.addError(12, "Expected an assignment or function call and instead saw an expression.")
-		.addError(4,  "'z' is not defined.")
+		.addError(12, "I thought you were going to type \"]\" to match \"[\" from line 12 but you typed \";\"")
+		.addError(12, "It looks like you're missing a semicolon.")
+		.addError(12, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(12, "It looks like you're missing a semicolon.")
+		.addError(12, "I thought you were going to type an identifier but you typed ']'.")
+		.addError(12, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(4,  "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.addError(12, "'a' is defined but never used.")
 		.addError(12, "'b' is defined but never used.")
 		.addError(12, "'c' is defined but never used.")
@@ -743,7 +743,7 @@ exports["test: destructuring var as moz"] = function (test) {
 	];
 
 	TestRun(test)
-		.addError(3,  "'z' is not defined.")
+		.addError(3,  "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.addError(8,  "'a' is defined but never used.")
 		.addError(6,  "'b' is defined but never used.")
 		.addError(6,  "'c' is defined but never used.")
@@ -770,7 +770,7 @@ exports["test: destructuring var as esnext"] = function (test) {
 	];
 
 	TestRun(test)
-		.addError(3,  "'z' is not defined.")
+		.addError(3,  "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.addError(8,  "'a' is defined but never used.")
 		.addError(6,  "'b' is defined but never used.")
 		.addError(6,  "'c' is defined but never used.")
@@ -808,7 +808,7 @@ exports["test: destructuring var as es5"] = function (test) {
 		.addError(7, "'destructuring expression' is only available in JavaScript 1.7.")
 		.addError(8, "'destructuring expression' is only available in JavaScript 1.7.")
 		.addError(8, "'destructuring expression' is only available in JavaScript 1.7.")
-		.addError(3,  "'z' is not defined.")
+		.addError(3,  "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.addError(8,  "'a' is defined but never used.")
 		.addError(6,  "'b' is defined but never used.")
 		.addError(6,  "'c' is defined but never used.")
@@ -846,7 +846,7 @@ exports["test: destructuring var as legacy JS"] = function (test) {
 		.addError(7, "'destructuring expression' is only available in JavaScript 1.7.")
 		.addError(8, "'destructuring expression' is only available in JavaScript 1.7.")
 		.addError(8, "'destructuring expression' is only available in JavaScript 1.7.")
-		.addError(3,  "'z' is not defined.")
+		.addError(3,  "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.addError(8,  "'a' is defined but never used.")
 		.addError(6,  "'b' is defined but never used.")
 		.addError(6,  "'c' is defined but never used.")
@@ -876,17 +876,17 @@ exports["test: destructuring var errors"] = function (test) {
 	];
 
 	TestRun(test)
-		.addError(9,  "Expected an identifier and instead saw '1'.")
-		.addError(9,  "Expected ',' and instead saw '1'.")
-		.addError(9,  "Expected an identifier and instead saw ']'.")
-		.addError(10, "Expected ',' and instead saw ';'.")
-		.addError(11, "Expected ']' to match '[' from line 11 and instead saw ';'.")
-		.addError(11, "Missing semicolon.")
-		.addError(11, "Expected an assignment or function call and instead saw an expression.")
-		.addError(11, "Missing semicolon.")
-		.addError(11, "Expected an identifier and instead saw ']'.")
-		.addError(11, "Expected an assignment or function call and instead saw an expression.")
-		.addError(3,  "'z' is not defined.")
+		.addError(9,  "I thought you were going to type an identifier but you typed '1'.")
+		.addError(9,  "I thought you were going to type \",\" but you typed \"1\".")
+		.addError(9,  "I thought you were going to type an identifier but you typed ']'.")
+		.addError(10, "I thought you were going to type \",\" but you typed \";\".")
+		.addError(11, "I thought you were going to type \"]\" to match \"[\" from line 11 but you typed \";\"")
+		.addError(11, "It looks like you're missing a semicolon.")
+		.addError(11, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(11, "It looks like you're missing a semicolon.")
+		.addError(11, "I thought you were going to type an identifier but you typed ']'.")
+		.addError(11, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(3,  "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.addError(11, "'a' is defined but never used.")
 		.addError(11, "'b' is defined but never used.")
 		.addError(11, "'c' is defined but never used.")
@@ -931,8 +931,8 @@ exports["test: destructuring const as moz"] = function (test) {
 		.addError(8, "'foobar' is defined but never used.")
 		.addError(9, "'aa' is defined but never used.")
 		.addError(9, "'bb' is defined but never used.")
-		.addError(3, "'z' is not defined.")
-		.addError(9, "'func' is not defined.")
+		.addError(3, "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(9, "\"func\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(code, {moz: true, unused: true, undef: true});
 
 	test.done();
@@ -966,7 +966,7 @@ exports["test: destructuring const as esnext"] = function (test) {
 		.addError(7, "'bar' is defined but never used.")
 		.addError(8, "'j' is defined but never used.")
 		.addError(8, "'foobar' is defined but never used.")
-		.addError(3, "'z' is not defined.")
+		.addError(3, "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(code, {esnext: true, unused: true, undef: true});
 
 	test.done();
@@ -1018,7 +1018,7 @@ exports["test: destructuring const as es5"] = function (test) {
 		.addError(7, "'bar' is defined but never used.")
 		.addError(8, "'j' is defined but never used.")
 		.addError(8, "'foobar' is defined but never used.")
-		.addError(3, "'z' is not defined.")
+		.addError(3, "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(code, {unused: true, undef: true}); // es5
 
 	test.done();
@@ -1070,7 +1070,7 @@ exports["test: destructuring const as legacy JS"] = function (test) {
 		.addError(7, "'bar' is defined but never used.")
 		.addError(8, "'j' is defined but never used.")
 		.addError(8, "'foobar' is defined but never used.")
-		.addError(3, "'z' is not defined.")
+		.addError(3, "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(code, {es3: true, unused: true, undef: true});
 
 	test.done();
@@ -1097,17 +1097,17 @@ exports["test: destructuring const errors"] = function (test) {
 		.addError(2, "const 'a' has already been declared.")
 		.addError(2, "const 'b' has already been declared.")
 		.addError(2, "const 'c' has already been declared.")
-		.addError(3, "Expected an identifier and instead saw '1'.")
-		.addError(3, "Expected ',' and instead saw '1'.")
-		.addError(3, "Expected an identifier and instead saw ']'.")
-		.addError(4, "Expected ',' and instead saw ';'.")
-		.addError(5, "Expected ']' to match '[' from line 5 and instead saw ';'.")
-		.addError(5, "Missing semicolon.")
-		.addError(5, "Expected an assignment or function call and instead saw an expression.")
-		.addError(5, "Missing semicolon.")
-		.addError(5, "Expected an identifier and instead saw ']'.")
-		.addError(5, "Expected an assignment or function call and instead saw an expression.")
-		.addError(5, "Missing semicolon.")
+		.addError(3, "I thought you were going to type an identifier but you typed '1'.")
+		.addError(3, "I thought you were going to type \",\" but you typed \"1\".")
+		.addError(3, "I thought you were going to type an identifier but you typed ']'.")
+		.addError(4, "I thought you were going to type \",\" but you typed \";\".")
+		.addError(5, "I thought you were going to type \"]\" to match \"[\" from line 5 but you typed \";\"")
+		.addError(5, "It looks like you're missing a semicolon.")
+		.addError(5, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(5, "It looks like you're missing a semicolon.")
+		.addError(5, "I thought you were going to type an identifier but you typed ']'.")
+		.addError(5, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(5, "It looks like you're missing a semicolon.")
 		.test(code, {es3: true, esnext: true, unused: true, undef: true});
 
 	test.done();
@@ -1126,7 +1126,7 @@ exports["test: destructuring globals as moz"] = function (test) {
 	];
 
 	TestRun(test)
-		.addError(4,  "'z' is not defined.")
+		.addError(4,  "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(code, {moz: true, unused: true, undef: true});
 
 	test.done();
@@ -1145,7 +1145,7 @@ exports["test: destructuring globals as esnext"] = function (test) {
 	];
 
 	TestRun(test)
-		.addError(4,  "'z' is not defined.")
+		.addError(4,  "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(code, {esnext: true, unused: true, undef: true});
 
 	test.done();
@@ -1164,7 +1164,7 @@ exports["test: destructuring globals as es5"] = function (test) {
 	];
 
 	TestRun(test)
-		.addError(4,  "'z' is not defined.")
+		.addError(4,  "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.addError(2, "'destructuring assignment' is only available in JavaScript 1.7.")
 		.addError(3, "'destructuring assignment' is only available in JavaScript 1.7.")
 		.addError(4, "'destructuring assignment' is only available in JavaScript 1.7.")
@@ -1190,7 +1190,7 @@ exports["test: destructuring globals as legacy JS"] = function (test) {
 	];
 
 	TestRun(test)
-		.addError(4,  "'z' is not defined.")
+		.addError(4,  "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.addError(2, "'destructuring assignment' is only available in JavaScript 1.7.")
 		.addError(3, "'destructuring assignment' is only available in JavaScript 1.7.")
 		.addError(4, "'destructuring assignment' is only available in JavaScript 1.7.")
@@ -1213,28 +1213,28 @@ exports["test: destructuring globals with syntax error"] = function (test) {
 	];
 
 	TestRun(test)
-		.addError(4, "Expected ']' to match '[' from line 4 and instead saw ';'.")
-		.addError(4, "Expected an assignment or function call and instead saw an expression.")
-		.addError(4, "Missing semicolon.")
-		.addError(4, "Expected an assignment or function call and instead saw an expression.")
-		.addError(4, "Missing semicolon.")
-		.addError(4, "Expected an identifier and instead saw ']'.")
-		.addError(4, "Expected an operator and instead saw '='.")
-		.addError(4, "Expected an operator and instead saw '['.")
-		.addError(4, "Expected an assignment or function call and instead saw an expression.")
-		.addError(4, "Missing semicolon.")
-		.addError(4, "Expected an assignment or function call and instead saw an expression.")
-		.addError(4, "Expected an assignment or function call and instead saw an expression.")
-		.addError(4, "Missing semicolon.")
-		.addError(4, "Expected an identifier and instead saw ']'.")
-		.addError(4, "Expected an assignment or function call and instead saw an expression.")
-		.addError(5, "Expected ']' to match '[' from line 5 and instead saw ';'.")
-		.addError(5, "Missing semicolon.")
-		.addError(5, "Expected an assignment or function call and instead saw an expression.")
-		.addError(5, "Missing semicolon.")
-		.addError(5, "Expected an identifier and instead saw ']'.")
-		.addError(5, "Expected an assignment or function call and instead saw an expression.")
-		.addError(2,  "'z' is not defined.")
+		.addError(4, "I thought you were going to type \"]\" to match \"[\" from line 4 but you typed \";\"")
+		.addError(4, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(4, "It looks like you're missing a semicolon.")
+		.addError(4, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(4, "It looks like you're missing a semicolon.")
+		.addError(4, "I thought you were going to type an identifier but you typed ']'.")
+		.addError(4, "I thought you were going to type an operator but you typed '='.")
+		.addError(4, "I thought you were going to type an operator but you typed '['.")
+		.addError(4, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(4, "It looks like you're missing a semicolon.")
+		.addError(4, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(4, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(4, "It looks like you're missing a semicolon.")
+		.addError(4, "I thought you were going to type an identifier but you typed ']'.")
+		.addError(4, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(5, "I thought you were going to type \"]\" to match \"[\" from line 5 but you typed \";\"")
+		.addError(5, "It looks like you're missing a semicolon.")
+		.addError(5, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(5, "It looks like you're missing a semicolon.")
+		.addError(5, "I thought you were going to type an identifier but you typed ']'.")
+		.addError(5, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(2,  "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(code, {esnext: true, unused: true, undef: true});
 
 	test.done();
@@ -1434,8 +1434,8 @@ exports["test: let statement out of scope as moz"] = function (test) {
 		.addError(1, "'x' is defined but never used.")
 		.addError(5, "'z' is defined but never used.")
 		.addError(3, "'y' is defined but never used.")
-		.addError(7, "'z' is not defined.")
-		.addError(9, "'y' is not defined.")
+		.addError(7, "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(9, "\"y\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(code, {moz: true, unused: true, undef: true, predef: ["print"]});
 
 	test.done();
@@ -1458,8 +1458,8 @@ exports["test: let statement out of scope as esnext"] = function (test) {
 		.addError(1, "'x' is defined but never used.")
 		.addError(5, "'z' is defined but never used.")
 		.addError(3, "'y' is defined but never used.")
-		.addError(7, "'z' is not defined.")
-		.addError(9, "'y' is not defined.")
+		.addError(7, "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(9, "\"y\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(code, {esnext: true, unused: true, undef: true, predef: ["print"]});
 
 	test.done();
@@ -1485,8 +1485,8 @@ exports["test: let statement out of scope as es5"] = function (test) {
 		.addError(1, "'x' is defined but never used.")
 		.addError(5, "'z' is defined but never used.")
 		.addError(3, "'y' is defined but never used.")
-		.addError(7, "'z' is not defined.")
-		.addError(9, "'y' is not defined.")
+		.addError(7, "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(9, "\"y\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(code, {unused: true, undef: true, predef: ["print"]}); // es5
 
 	test.done();
@@ -1512,8 +1512,8 @@ exports["test: let statement out of scope as legacy JS"] = function (test) {
 		.addError(1, "'x' is defined but never used.")
 		.addError(5, "'z' is defined but never used.")
 		.addError(3, "'y' is defined but never used.")
-		.addError(7, "'z' is not defined.")
-		.addError(9, "'y' is not defined.")
+		.addError(7, "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(9, "\"y\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(code, {es3: true, unused: true, undef: true, predef: ["print"]});
 
 	test.done();
@@ -1633,9 +1633,9 @@ exports["test: let statement not in scope as moz"] = function (test) {
 		.addError(6, "'z' is defined but never used.")
 		.addError(3, "'y' is defined but never used.")
 		.addError(4, "'bar' is defined but never used.")
-		.addError(8, "'z' is not defined.")
-		.addError(10, "'y' is not defined.")
-		.addError(11, "'bar' is not defined.")
+		.addError(8, "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(10, "\"y\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(11, "\"bar\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(code, {moz: true, unused: true, undef: true, predef: ["print"]});
 
 	test.done();
@@ -1661,9 +1661,9 @@ exports["test: let statement not in scope as esnext"] = function (test) {
 		.addError(6, "'z' is defined but never used.")
 		.addError(3, "'y' is defined but never used.")
 		.addError(4, "'bar' is defined but never used.")
-		.addError(8, "'z' is not defined.")
-		.addError(10, "'y' is not defined.")
-		.addError(11, "'bar' is not defined.")
+		.addError(8, "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(10, "\"y\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(11, "\"bar\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(code, {esnext: true, unused: true, undef: true, predef: ["print"]});
 
 	test.done();
@@ -1693,9 +1693,9 @@ exports["test: let statement not in scope as es5"] = function (test) {
 		.addError(6, "'z' is defined but never used.")
 		.addError(3, "'y' is defined but never used.")
 		.addError(4, "'bar' is defined but never used.")
-		.addError(8, "'z' is not defined.")
-		.addError(10, "'y' is not defined.")
-		.addError(11, "'bar' is not defined.")
+		.addError(8, "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(10, "\"y\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(11, "\"bar\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(code, {unused: true, undef: true, predef: ["print"]}); // es5
 
 	test.done();
@@ -1725,9 +1725,9 @@ exports["test: let statement not in scope as legacy JS"] = function (test) {
 		.addError(6, "'z' is defined but never used.")
 		.addError(3, "'y' is defined but never used.")
 		.addError(4, "'bar' is defined but never used.")
-		.addError(8, "'z' is not defined.")
-		.addError(10, "'y' is not defined.")
-		.addError(11, "'bar' is not defined.")
+		.addError(8, "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(10, "\"y\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(11, "\"bar\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(code, {es3: true, unused: true, undef: true, predef: ["print"]});
 
 	test.done();
@@ -2655,7 +2655,7 @@ exports["test: array comprehension with unused variables"] = function (test) {
 		"print('ret:', ret);",
 	];
 	TestRun(test)
-		.addError(1, "'unknown' is not defined.")
+		.addError(1, "\"unknown\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(code, {esnext: true, unused: true, undef: true, predef: ["print"]});
 
 	test.done();
@@ -2667,7 +2667,7 @@ exports["test: moz-style array comprehension with unused variables"] = function 
 		"print('ret:', ret);",
 	];
 	TestRun(test)
-		.addError(1, "'unknown' is not defined.")
+		.addError(1, "\"unknown\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(code, {moz: true, unused: true, undef: true, predef: ["print"]});
 
 	test.done();
@@ -2689,9 +2689,9 @@ exports["test: moz-style array comprehension as esnext"] = function (test) {
 	TestRun(test)
 		.addError(3, "A yield statement shall be within a generator function (with syntax: " +
 			"`function*`)")
-		.addError(6, "Expected 'for' and instead saw 'i'.")
+		.addError(6, "I thought you were going to type \"for\" but you typed \"i\".")
 		.addError(6, "'for each' is only available in Mozilla JavaScript extensions (use moz option).")
-		.addError(7, "Expected 'for' and instead saw 'i'.")
+		.addError(7, "I thought you were going to type \"for\" but you typed \"i\".")
 		.addError(7, "'for each' is only available in Mozilla JavaScript extensions (use moz option).")
 		.test(code, {esnext: true, unused: true, undef: true, predef: ["print"]});
 
@@ -2742,11 +2742,11 @@ exports["test: moz-style array comprehension as es5"] = function (test) {
 		.addError(3, "'yield' is only available in JavaScript 1.7.")
 		.addError(6, "'array comprehension' is only available in ES6 " +
 			"(use esnext option).")
-		.addError(6, "Expected 'for' and instead saw 'i'.")
+		.addError(6, "I thought you were going to type \"for\" but you typed \"i\".")
 		.addError(6, "'for each' is only available in Mozilla JavaScript extensions (use moz option).")
 		.addError(7, "'array comprehension' is only available in ES6 " +
 			"(use esnext option).")
-		.addError(7, "Expected 'for' and instead saw 'i'.")
+		.addError(7, "I thought you were going to type \"for\" but you typed \"i\".")
 		.addError(7, "'for each' is only available in Mozilla JavaScript extensions (use moz option).")
 		.test(code, {unused: true, undef: true, predef: ["print"]}); // es5
 
@@ -2796,11 +2796,11 @@ exports["test: moz-style array comprehension as legacy JS"] = function (test) {
 		.addError(3, "'yield' is only available in JavaScript 1.7.")
 		.addError(6, "'array comprehension' is only available in ES6 " +
 			"(use esnext option).")
-		.addError(6, "Expected 'for' and instead saw 'i'.")
+		.addError(6, "I thought you were going to type \"for\" but you typed \"i\".")
 		.addError(6, "'for each' is only available in Mozilla JavaScript extensions (use moz option).")
 		.addError(7, "'array comprehension' is only available in ES6 " +
 			"(use esnext option).")
-		.addError(7, "Expected 'for' and instead saw 'i'.")
+		.addError(7, "I thought you were going to type \"for\" but you typed \"i\".")
 		.addError(7, "'for each' is only available in Mozilla JavaScript extensions (use moz option).")
 		.test(code, {es3: true, unused: true, undef: true, predef: ["print"]});
 
@@ -2838,11 +2838,11 @@ exports['test: moz-style array comprehension with dest array at global scope as 
 		"var destarray_comparray_2 = [ [i, {i: [i, j]} ] for each ([i, j] in [[0,0], [1,1], [2,2]])];",
 	];
 	TestRun(test)
-		.addError(1, "Expected 'for' and instead saw '['.")
+		.addError(1, "I thought you were going to type \"for\" but you typed \"[\".")
 		.addError(1, "'for each' is only available in Mozilla JavaScript extensions (use moz option).")
-		.addError(2, "Expected 'for' and instead saw '['.")
+		.addError(2, "I thought you were going to type \"for\" but you typed \"[\".")
 		.addError(2, "'for each' is only available in Mozilla JavaScript extensions (use moz option).")
-		.addError(3, "Expected 'for' and instead saw '['.")
+		.addError(3, "I thought you were going to type \"for\" but you typed \"[\".")
 		.addError(3, "'for each' is only available in Mozilla JavaScript extensions (use moz option).")
 		.test(code, {esnext: true, undef: true, predef: ["print"]});
 
@@ -2876,15 +2876,15 @@ exports['test: moz-style array comprehension with dest array at global scope as 
 	TestRun(test)
 		.addError(1, "'array comprehension' is only available in ES6 " +
 			"(use esnext option).")
-		.addError(1, "Expected 'for' and instead saw '['.")
+		.addError(1, "I thought you were going to type \"for\" but you typed \"[\".")
 		.addError(1, "'for each' is only available in Mozilla JavaScript extensions (use moz option).")
 		.addError(2, "'array comprehension' is only available in ES6 " +
 			"(use esnext option).")
-		.addError(2, "Expected 'for' and instead saw '['.")
+		.addError(2, "I thought you were going to type \"for\" but you typed \"[\".")
 		.addError(2, "'for each' is only available in Mozilla JavaScript extensions (use moz option).")
 		.addError(3, "'array comprehension' is only available in ES6 " +
 			"(use esnext option).")
-		.addError(3, "Expected 'for' and instead saw '['.")
+		.addError(3, "I thought you were going to type \"for\" but you typed \"[\".")
 		.addError(3, "'for each' is only available in Mozilla JavaScript extensions (use moz option).")
 		.test(code, {undef: true, predef: ["print"]}); // es5
 
@@ -2918,15 +2918,15 @@ exports['test: moz-style array comprehension with dest array at global scope as 
 	TestRun(test)
 		.addError(1, "'array comprehension' is only available in ES6 " +
 			"(use esnext option).")
-		.addError(1, "Expected 'for' and instead saw '['.")
+		.addError(1, "I thought you were going to type \"for\" but you typed \"[\".")
 		.addError(1, "'for each' is only available in Mozilla JavaScript extensions (use moz option).")
 		.addError(2, "'array comprehension' is only available in ES6 " +
 			"(use esnext option).")
-		.addError(2, "Expected 'for' and instead saw '['.")
+		.addError(2, "I thought you were going to type \"for\" but you typed \"[\".")
 		.addError(2, "'for each' is only available in Mozilla JavaScript extensions (use moz option).")
 		.addError(3, "'array comprehension' is only available in ES6 " +
 			"(use esnext option).")
-		.addError(3, "Expected 'for' and instead saw '['.")
+		.addError(3, "I thought you were going to type \"for\" but you typed \"[\".")
 		.addError(3, "'for each' is only available in Mozilla JavaScript extensions (use moz option).")
 		.test(code, {es3: true, undef: true, predef: ["print"]});
 
@@ -2971,7 +2971,7 @@ exports["test: moz-style array comprehension imbrication with dest array as esne
 		"[ [i, j] for each ([i, j] in [[a, b] for each ([a, b] in [[2,2], [3,4]])]) ];"
 	];
 	TestRun(test)
-		.addError(1, "Expected 'for' and instead saw '['.")
+		.addError(1, "I thought you were going to type \"for\" but you typed \"[\".")
 		.addError(1, "'for each' is only available in Mozilla JavaScript extensions (use moz option).")
 		.test(code, {esnext: true, undef: true, predef: ["print"]});
 
@@ -3016,8 +3016,8 @@ exports["test: array comprehension imbrication with dest array as legacy JS"] = 
 			"(use esnext option).")
 		.addError(1, "'array comprehension' is only available in ES6 " +
 			"(use esnext option).")
-		.addError(1, "Expected 'for' and instead saw '['.")
-		.addError(1, "Expected 'for' and instead saw '['.")
+		.addError(1, "I thought you were going to type \"for\" but you typed \"[\".")
+		.addError(1, "I thought you were going to type \"for\" but you typed \"[\".")
 		.addError(1, "'for each' is only available in Mozilla JavaScript extensions (use moz option).")
 		.test(code, {es3: true, undef: true, predef: ["print"]});
 
@@ -3034,8 +3034,8 @@ exports["test: moz-style array comprehension imbrication with dest array as lega
 			"(use esnext option).")
 		.addError(1, "'array comprehension' is only available in ES6 " +
 			"(use esnext option).")
-		.addError(1, "Expected 'for' and instead saw '['.")
-		.addError(1, "Expected 'for' and instead saw '['.")
+		.addError(1, "I thought you were going to type \"for\" but you typed \"[\".")
+		.addError(1, "I thought you were going to type \"for\" but you typed \"[\".")
 		.addError(1, "'for each' is only available in Mozilla JavaScript extensions (use moz option).")
 		.test(code, {es3: true, undef: true, predef: ["print"]});
 
@@ -3333,9 +3333,9 @@ exports["regression test for crash from GH-964"] = function (test) {
 	];
 
 	TestRun(test)
-		.addError(2, "Bad assignment.")
-		.addError(2, "Expected an operator and instead saw 'new'.")
-		.addError(2, "Missing semicolon.")
+		.addError(2, "The left side of an assignment must be a single variable name, not an expression.")
+		.addError(2, "I thought you were going to type an operator but you typed 'new'.")
+		.addError(2, "It looks like you're missing a semicolon.")
 		.test(code);
 
 	test.done();
@@ -3377,7 +3377,7 @@ exports["automatic comma insertion GH-950"] = function (test) {
 		.addError(6, "Bad line breaking before '&&'.")
 		.addError(8, "Line breaking error 'return'.")
 		.addError(9, "Label 'a' on 1 statement.")
-		.addError(9, "Expected an assignment or function call and instead saw an expression.");
+		.addError(9, "I thought you were going to type an assignment or function call but you typed an expression instead.");
 
 	run.test(code, {es3: true, asi: true});
 	run.test(code, {asi: true}); // es5
@@ -3386,14 +3386,14 @@ exports["automatic comma insertion GH-950"] = function (test) {
 
 	run = TestRun(test)
 		.addError(2, "Bad line breaking before 'instanceof'.")
-		.addError(3, "Missing semicolon.")
-		.addError(4, "Missing semicolon.")
+		.addError(3, "It looks like you're missing a semicolon.")
+		.addError(4, "It looks like you're missing a semicolon.")
 		.addError(6, "Bad line breaking before '&&'.")
 		.addError(8, "Line breaking error 'return'.")
-		.addError(8, "Missing semicolon.")
+		.addError(8, "It looks like you're missing a semicolon.")
 		.addError(9, "Label 'a' on 1 statement.")
-		.addError(9, "Expected an assignment or function call and instead saw an expression.")
-		.addError(9, "Missing semicolon.");
+		.addError(9, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(9, "It looks like you're missing a semicolon.");
 
 	run.test(code, {es3: true, asi: false});
 	run.test(code, {asi: false}); // es5
@@ -3426,12 +3426,12 @@ exports["fat arrows support"] = function (test) {
 	];
 
 	var run = TestRun(test)
-		.addError(5, "'evens' is not defined.")
-		.addError(6, "'nats' is not defined.")
-		.addError(8, "'print' is not defined.")
-		.addError(9, "'print' is not defined.")
-		.addError(9, "'j' is not defined.")
-		.addError(8, "'z' is not defined.");
+		.addError(5, "\"evens\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(6, "\"nats\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(8, "\"print\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(9, "\"print\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(9, "\"j\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(8, "\"z\" is not defined. Make sure you're spelling it correctly and that you declared it.");
 
 	run.test(code, { undef: true, esnext: true });
 	run.test(code, { undef: true, moz: true });
@@ -3692,22 +3692,22 @@ exports.classes = function (test) {
 	cexprAssn = code.indexOf(cexprAssn) + 1;
 
 	var run = TestRun(test)
-		.addError(cdecl + 4, "Expected an identifier and instead saw 'package' (a reserved word).")
-		.addError(cexpr + 4, "Expected an identifier and instead saw 'package' (a reserved word).");
+		.addError(cdecl + 4, "I thought you were going to type an identifier but you typed 'package' (a reserved word).")
+		.addError(cexpr + 4, "I thought you were going to type an identifier but you typed 'package' (a reserved word).");
 
 	run.test(code, {esnext: true});
 	run.test(code, {moz: true});
 
 	run
 		.addError(cdecl + 1, "'Foo0' is defined but never used.")
-		.addError(cdecl + 3, "Expected an identifier and instead saw 'protected' (a reserved word).")
+		.addError(cdecl + 3, "I thought you were going to type an identifier but you typed 'protected' (a reserved word).")
 		.addError(cdecl + 3, "'protected' is defined but never used.")
 		.addError(cdecl + 4, "'package' is defined but never used.");
 	run
 		.addError(cexpr + 1, "'Foo7' is defined but never used.")
-		.addError(cexpr + 3, "Expected an identifier and instead saw 'static' (a reserved word).")
+		.addError(cexpr + 3, "I thought you were going to type an identifier but you typed 'static' (a reserved word).")
 		.addError(cexpr + 3, "'static' is defined but never used.")
-		.addError(cexpr + 3, "Expected an identifier and instead saw 'protected' (a reserved word).")
+		.addError(cexpr + 3, "I thought you were going to type an identifier but you typed 'protected' (a reserved word).")
 		.addError(cexpr + 4, "'package' is defined but never used.");
 
 	code[0] = "'use strict';" + code[0];
@@ -3728,8 +3728,8 @@ exports["class and method naming"] = function (test) {
 		"}"
 	];
 	var run = TestRun(test)
-		.addError(1, "Expected an identifier and instead saw 'eval' (a reserved word).")
-		.addError(2, "Expected an identifier and instead saw 'arguments' (a reserved word).")
+		.addError(1, "I thought you were going to type an identifier but you typed 'eval' (a reserved word).")
+		.addError(2, "I thought you were going to type an identifier but you typed 'arguments' (a reserved word).")
 		.addError(4, "A class getter method cannot be named 'constructor'.")
 		.addError(5, "A class setter method cannot be named 'constructor'.")
 		.addError(7, "A class method cannot be named 'prototype'.");
@@ -3753,7 +3753,7 @@ exports["test for GH-1018"] = function (test) {
 	run.test(code, {boss: true});
 
 	for (var i = 0; i < code.length; i++) {
-		run.addError(i + 1, "Expected a conditional expression and instead saw an assignment.");
+		run.addError(i + 1, "I thought you were going to type a conditional expression but you typed an assignment instead. Maybe you meant to type === instead of =?");
 	}
 
 	run.test(code);
@@ -3772,8 +3772,8 @@ exports["test warnings for assignments in conditionals"] = function (test) {
 	];
 
 	var run = TestRun(test)
-		.addError(1, "Expected a conditional expression and instead saw an assignment.")
-		.addError(4, "Expected a conditional expression and instead saw an assignment.");
+		.addError(1, "I thought you were going to type a conditional expression but you typed an assignment instead. Maybe you meant to type === instead of =?")
+		.addError(4, "I thought you were going to type a conditional expression but you typed an assignment instead. Maybe you meant to type === instead of =?");
 
 	run.test(code); // es5
 
@@ -3794,7 +3794,7 @@ exports["test for GH-1089"] = function (test) {
 	];
 
 	var run = TestRun(test)
-		.addError(9, "Expected an assignment or function call and instead saw an expression.");
+		.addError(9, "I thought you were going to type an assignment or function call but you typed an expression instead.");
 
 	run.test(code, {moz: true});
 
@@ -3840,7 +3840,7 @@ exports["test for GH-1105"] = function (test) {
 	];
 
 	var run = TestRun(test)
-		.addError(2, "Missing semicolon.");
+		.addError(2, "It looks like you're missing a semicolon.");
 
 	run.test(code);
 	test.done();
@@ -3861,20 +3861,20 @@ exports["test for crash with invalid condition"] = function (test) {
 	// As long as jshint doesn't crash, it doesn't matter what these errors
 	// are. Feel free to adjust these if they don't match the output.
 	var run = TestRun(test)
-		.addError(1, "Expected an identifier and instead saw ')'.")
-		.addError(1, "Expected ')' to match '(' from line 1 and instead saw ';'.")
-		.addError(2, "Expected an identifier and instead saw ','.")
-		.addError(3, "Unexpected ')'.")
-		.addError(4, "Expected an identifier and instead saw ','.")
-		.addError(4, "Expected ')' to match '(' from line 4 and instead saw 'b'.")
-		.addError(4, "Expected an identifier and instead saw ')'.")
-		.addError(6, "Expected an identifier and instead saw ','.")
-		.addError(7, "Unexpected ')'.")
-		.addError(7, "Expected an identifier and instead saw ')'.")
-		.addError(7, "Expected ')' to match '(' from line 7 and instead saw ';'.")
-		.addError(8, "Expected an identifier and instead saw ','.")
-		.addError(8, "Expected ')' to match '(' from line 8 and instead saw 'b'.")
-		.addError(8, "Expected an identifier and instead saw ')'.");
+		.addError(1, "I thought you were going to type an identifier but you typed ')'.")
+		.addError(1, "I thought you were going to type \")\" to match \"(\" from line 1 but you typed \";\"")
+		.addError(2, "I think you meant to type a value or variable name before that comma?")
+		.addError(3, "I think you either have an extra comma or a missing argument?")
+		.addError(4, "I think you meant to type a value or variable name before that comma?")
+		.addError(4, "I thought you were going to type \")\" to match \"(\" from line 4 but you typed \"b\"")
+		.addError(4, "I thought you were going to type an identifier but you typed ')'.")
+		.addError(6, "I think you meant to type a value or variable name before that comma?")
+		.addError(7, "I think you either have an extra comma or a missing argument?")
+		.addError(7, "I thought you were going to type an identifier but you typed ')'.")
+		.addError(7, "I thought you were going to type \")\" to match \"(\" from line 7 but you typed \";\"")
+		.addError(8, "I think you meant to type a value or variable name before that comma?")
+		.addError(8, "I thought you were going to type \")\" to match \"(\" from line 8 but you typed \"b\"")
+		.addError(8, "I thought you were going to type an identifier but you typed ')'.");
 
 	run.test(code, {asi: true, expr: true});
 	test.done();
@@ -3927,7 +3927,7 @@ exports["test for GH-387"] = function (test) {
 	];
 
 	var run = TestRun(test)
-		.addError(1, "Missing semicolon.");
+		.addError(1, "It looks like you're missing a semicolon.");
 
 	run.test(code); // es5
 
@@ -3974,32 +3974,32 @@ exports["test for line breaks with 'yield'"] = function (test) {
 	// ```
 	run = TestRun(test)
 		.addError(1, "'function*' is only available in ES6 (use esnext option).")
-		.addError(3, "Expected ')' to match '(' from line 2 and instead saw 'c'.")
-		.addError(4, "Expected an identifier and instead saw ')'.")
-		.addError(4, "Expected an assignment or function call and instead saw an expression.")
-		.addError(6, "Expected an assignment or function call and instead saw an expression.")
+		.addError(3, "I thought you were going to type \")\" to match \"(\" from line 2 but you typed \"c\"")
+		.addError(4, "I thought you were going to type an identifier but you typed ')'.")
+		.addError(4, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(6, "I thought you were going to type an assignment or function call but you typed an expression instead.")
 		.addError(8, "Comma warnings can be turned off with 'laxcomma'.")
 		.addError(7, "Bad line breaking before ','.")
-		.addError(10, "Expected an identifier and instead saw '?'.")
-		.addError(10, "Expected an assignment or function call and instead saw an expression.")
+		.addError(10, "I thought you were going to type an identifier but you typed '?'.")
+		.addError(10, "I thought you were going to type an assignment or function call but you typed an expression instead.")
 		.addError(10, "Label 'i' on j statement.")
-		.addError(10, "Expected an assignment or function call and instead saw an expression.")
-		.addError(14, "Expected an assignment or function call and instead saw an expression.");
+		.addError(10, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(14, "I thought you were going to type an assignment or function call but you typed an expression instead.");
 
 	run.test(code, {moz: true, asi: true});
 
 	run
 		.addError(2, "Line breaking error 'yield'.")
-		.addError(3, "Missing semicolon.")
+		.addError(3, "It looks like you're missing a semicolon.")
 		.addError(5, "Line breaking error 'yield'.")
-		.addError(5, "Missing semicolon.")
+		.addError(5, "It looks like you're missing a semicolon.")
 		.addError(7, "Line breaking error 'yield'.")
 		.addError(9, "Line breaking error 'yield'.")
-		.addError(9, "Missing semicolon.")
-		.addError(10, "Missing semicolon.")
+		.addError(9, "It looks like you're missing a semicolon.")
+		.addError(10, "It looks like you're missing a semicolon.")
 		.addError(11, "Line breaking error 'yield'.")
 		.addError(13, "Line breaking error 'yield'.")
-		.addError(13, "Missing semicolon.");
+		.addError(13, "It looks like you're missing a semicolon.");
 
 	run.test(code, {moz: true});
 	test.done();
@@ -4032,7 +4032,7 @@ exports["test for 'break' in switch case + curly braces"] = function (test) {
 
 	// No error for case 1, 2, 3.
 	var run = TestRun(test)
-		.addError(9, "Expected a 'break' statement before 'default'.")
+		.addError(9, "Did you forget a 'break' statement before 'default'?")
 		.test(code);
 
 	test.done();
@@ -4091,11 +4091,11 @@ exports["regression test for GH-1431"] = function (test) {
 	// The code is invalid but it should not crash JSHint.
 	TestRun(test)
 		.addError(1, "Use '!==' to compare with 'null'.")
-		.addError(1, "Expected ';' and instead saw ')'.")
-		.addError(1, "Expected ')' and instead saw ';'.")
-		.addError(1, "Expected an identifier and instead saw ';'.")
-		.addError(1, "Expected ')' to match '(' from line 1 and instead saw 'i'.")
-		.addError(1, "Expected an identifier and instead saw ')'.")
+		.addError(1, "I thought you were going to type \";\" but you typed \")\".")
+		.addError(1, "I thought you were going to type \")\" but you typed \";\"!")
+		.addError(1, "I thought you were going to type an identifier but you typed ';'.")
+		.addError(1, "I thought you were going to type \")\" to match \"(\" from line 1 but you typed \"i\"")
+		.addError(1, "I thought you were going to type an identifier but you typed ')'.")
 		.test("for (i=0; (arr[i])!=null); i++);");
 
 	test.done();

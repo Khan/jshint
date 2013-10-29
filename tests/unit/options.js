@@ -92,7 +92,7 @@ exports.latedef = function (test) {
 
 	// However, JSHint must complain if variable is actually missing
 	TestRun(test)
-		.addError(1, "'fn' is not defined.")
+		.addError(1, "\"fn\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test('fn();', { es3: true, undef: true });
 
 	// And it also must complain about the redefinition (see option `shadow`)
@@ -139,8 +139,8 @@ exports['combination of latedef and undef'] = function (test) {
 	// Assures that when `undef` is set to true, it'll report undefined variables
 	// and late definitions won't be reported as `latedef` is set to false.
 	TestRun(test)
-		.addError(29, "'hello' is not defined.")
-		.addError(35, "'world' is not defined.")
+		.addError(29, "\"hello\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(35, "\"world\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(src, { es3: true, latedef: false, undef: true });
 
 	// When we suppress `latedef` and `undef` then we get no warnings.
@@ -171,17 +171,17 @@ exports['combination of latedef and undef'] = function (test) {
 		.addError(12, "'foo' was used before it was defined.")
 		.addError(18, "'fn1' was used before it was defined.")
 		.addError(26, "'baz' was used before it was defined.")
-		.addError(29, "'hello' is not defined.")
+		.addError(29, "\"hello\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.addError(34, "'fn' was used before it was defined.")
-		.addError(35, "'world' is not defined.")
+		.addError(35, "\"world\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.addError(41, "'q' was used before it was defined.")
 		.addError(46, "'h' was used before it was defined.")
 		.test(src, { es3: true, latedef: true, undef: true });
 
 	// If we remove latedef_func, we don't get the functions warning
 	TestRun(test)
-		.addError(29, "'hello' is not defined.")
-		.addError(35, "'world' is not defined.")
+		.addError(29, "\"hello\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(35, "\"world\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.addError(41, "'q' was used before it was defined.")
 		.addError(46, "'h' was used before it was defined.")
 		.test(src, { es3: true, latedef: "nofunc", undef: true });
@@ -200,7 +200,7 @@ exports.undefwstrict = function (test) {
 exports["implied and unused should respect hoisting"] = function (test) {
 	var src = fs.readFileSync(__dirname + '/fixtures/gh431.js', 'utf8');
 	TestRun(test)
-		.addError(14, "'fun4' is not defined.")
+		.addError(14, "\"fun4\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(src, { undef: true }); // es5
 
 	JSHINT.flag = true;
@@ -292,10 +292,10 @@ exports.curly = function (test) {
 
 	// Require all blocks to be wrapped with curly braces if curly is true
 	TestRun(test)
-		.addError(2, "Expected '{' and instead saw 'return'.")
-		.addError(5, "Expected '{' and instead saw 'doSomething'.")
-		.addError(8, "Expected '{' and instead saw 'doSomething'.")
-		.addError(11, "Expected '{' and instead saw 'doSomething'.")
+		.addError(2, "I thought you were going to type \"{\" but you typed \"return\".")
+		.addError(5, "I thought you were going to type \"{\" but you typed \"doSomething\".")
+		.addError(8, "I thought you were going to type \"{\" but you typed \"doSomething\".")
+		.addError(11, "I thought you were going to type \"{\" but you typed \"doSomething\".")
 		.test(src, { es3: true, curly: true });
 
 	TestRun(test).test(src1, { es3: true, curly: true });
@@ -361,34 +361,34 @@ exports.shelljs = function (test) {
 	var src = fs.readFileSync(__dirname + '/fixtures/shelljs.js', 'utf8');
 
 	TestRun(test, 1)
-		.addError(1, "'target' is not defined.")
-		.addError(3, "'echo' is not defined.")
-		.addError(4, "'exit' is not defined.")
-		.addError(5, "'cd' is not defined.")
-		.addError(6, "'pwd' is not defined.")
-		.addError(7, "'ls' is not defined.")
-		.addError(8, "'find' is not defined.")
-		.addError(9, "'cp' is not defined.")
-		.addError(10, "'rm' is not defined.")
-		.addError(11, "'mv' is not defined.")
-		.addError(12, "'mkdir' is not defined.")
-		.addError(13, "'test' is not defined.")
-		.addError(14, "'cat' is not defined.")
-		.addError(15, "'sed' is not defined.")
-		.addError(16, "'grep' is not defined.")
-		.addError(17, "'which' is not defined.")
-		.addError(18, "'dirs' is not defined.")
-		.addError(19, "'pushd' is not defined.")
-		.addError(20, "'popd' is not defined.")
-		.addError(21, "'env' is not defined.")
-		.addError(22, "'exec' is not defined.")
-		.addError(23, "'chmod' is not defined.")
-		.addError(24, "'config' is not defined.")
-		.addError(25, "'error' is not defined.")
-		.addError(26, "'tempdir' is not defined.")
-		.addError(29, "'require' is not defined.")
-		.addError(30, "'module' is not defined.")
-		.addError(31, "'process' is not defined.")
+		.addError(1, "\"target\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(3, "\"echo\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(4, "\"exit\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(5, "\"cd\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(6, "\"pwd\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(7, "\"ls\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(8, "\"find\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(9, "\"cp\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(10, "\"rm\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(11, "\"mv\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(12, "\"mkdir\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(13, "\"test\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(14, "\"cat\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(15, "\"sed\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(16, "\"grep\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(17, "\"which\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(18, "\"dirs\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(19, "\"pushd\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(20, "\"popd\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(21, "\"env\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(22, "\"exec\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(23, "\"chmod\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(24, "\"config\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(25, "\"error\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(26, "\"tempdir\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(29, "\"require\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(30, "\"module\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(31, "\"process\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(src, { undef: true });
 
 	TestRun(test, 2)
@@ -402,29 +402,29 @@ exports.asi = function (test) {
 	var src = fs.readFileSync(__dirname + '/fixtures/asi.js', 'utf8');
 
 	TestRun(test, 1)
-		.addError(2, "Missing semicolon.")
-		.addError(4, "Missing semicolon.")
-		.addError(5, "Missing semicolon.")
+		.addError(2, "It looks like you're missing a semicolon.")
+		.addError(4, "It looks like you're missing a semicolon.")
+		.addError(5, "It looks like you're missing a semicolon.")
 		.addError(9, "Line breaking error 'continue'.")
-		.addError(9, "Missing semicolon.")
-		.addError(10, "Missing semicolon.")
+		.addError(9, "It looks like you're missing a semicolon.")
+		.addError(10, "It looks like you're missing a semicolon.")
 		.addError(11, "Line breaking error 'break'.")
-		.addError(11, "Missing semicolon.")
-		.addError(12, "Missing semicolon.")
-		.addError(16, "Missing semicolon.")
-		.addError(17, "Missing semicolon.")
+		.addError(11, "It looks like you're missing a semicolon.")
+		.addError(12, "It looks like you're missing a semicolon.")
+		.addError(16, "It looks like you're missing a semicolon.")
+		.addError(17, "It looks like you're missing a semicolon.")
 		.addError(19, "Line breaking error 'break'.")
-		.addError(19, "Missing semicolon.")
+		.addError(19, "It looks like you're missing a semicolon.")
 		.addError(21, "Line breaking error 'break'.")
-		.addError(21, "Missing semicolon.")
-		.addError(25, "Missing semicolon.")
-		.addError(26, "Missing semicolon.", { character: 10 })
-		.addError(27, "Missing semicolon.", { character: 12 })
-		.addError(28, "Missing semicolon.", { character: 12 })
+		.addError(21, "It looks like you're missing a semicolon.")
+		.addError(25, "It looks like you're missing a semicolon.")
+		.addError(26, "It looks like you're missing a semicolon.", { character: 10 })
+		.addError(27, "It looks like you're missing a semicolon.", { character: 12 })
+		.addError(28, "It looks like you're missing a semicolon.", { character: 12 })
 		.test(src, { es3: true });
 
 	TestRun(test, 2)
-		.addError(2, "Missing semicolon.") // throw on "use strict", even option asi is used
+		.addError(2, "It looks like you're missing a semicolon.") // throw on "use strict", even option asi is used
 		.test(src, { es3: true, asi: true });
 
 	test.done();
@@ -437,15 +437,15 @@ exports.lastsemic = function (test) {
 
 	// without lastsemic
 	TestRun(test)
-		.addError(2, "Missing semicolon.") // missing semicolon in the middle of a block
-		.addError(4, "Missing semicolon.") // missing semicolon in a one-liner function
-		.addError(5, "Missing semicolon.") // missing semicolon at the end of a block
+		.addError(2, "It looks like you're missing a semicolon.") // missing semicolon in the middle of a block
+		.addError(4, "It looks like you're missing a semicolon.") // missing semicolon in a one-liner function
+		.addError(5, "It looks like you're missing a semicolon.") // missing semicolon at the end of a block
 		.test(src, {es3: true});
 
 	// with lastsemic
 	TestRun(test)
-		.addError(2, "Missing semicolon.")
-		.addError(5, "Missing semicolon.")
+		.addError(2, "It looks like you're missing a semicolon.")
+		.addError(5, "It looks like you're missing a semicolon.")
 		.test(src, { es3: true, lastsemic: true });
 	// this line is valid now: [1, 2, 3].forEach(function(i) { print(i) });
 	// line 5 isn't, because the block doesn't close on the same line
@@ -475,7 +475,7 @@ exports.expr = function (test) {
 
 	for (var i = 0, exp; exp = exps[i]; i += 1) {
 		TestRun(test)
-			.addError(1, 'Expected an assignment or function call and instead saw an expression.')
+			.addError(1, 'I thought you were going to type an assignment or function call but you typed an expression instead.')
 			.test(exp, { es3: true });
 	}
 
@@ -495,16 +495,16 @@ exports.undef = function (test) {
 
 	// Make sure it fails when undef is true
 	TestRun(test)
-		.addError(1, "'undef' is not defined.")
-		.addError(5, "'undef' is not defined.")
-		.addError(6, "'undef' is not defined.")
-		.addError(8, "'undef' is not defined.")
-		.addError(9, "'undef' is not defined.")
-		.addError(13, "'localUndef' is not defined.")
-		.addError(18, "'localUndef' is not defined.")
-		.addError(19, "'localUndef' is not defined.")
-		.addError(21, "'localUndef' is not defined.")
-		.addError(22, "'localUndef' is not defined.")
+		.addError(1, "\"undef\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(5, "\"undef\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(6, "\"undef\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(8, "\"undef\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(9, "\"undef\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(13, "\"localUndef\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(18, "\"localUndef\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(19, "\"localUndef\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(21, "\"localUndef\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(22, "\"localUndef\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(src, { es3: true, undef: true });
 
 	// Regression test for GH-668.
@@ -690,8 +690,8 @@ exports.loopfunc = function (test) {
 
 	// By default, not functions are allowed inside loops
 	TestRun(test)
-		.addError(2, "Don't make functions within a loop.")
-		.addError(6, "Don't make functions within a loop.")
+		.addError(2, "It's not a good idea to define functions within a loop. Can you define them outside instead?")
+		.addError(6, "It's not a good idea to define functions within a loop. Can you define them outside instead?")
 		.addError(10, "Function declarations should not be placed in blocks. Use a function " +
 					  "expression or move the statement to the top of the outer function.")
 		.test(src, {es3: true});
@@ -712,16 +712,16 @@ exports.boss = function (test) {
 
 	// By default, warn about suspicious assignments
 	TestRun(test)
-		.addError(1, 'Expected a conditional expression and instead saw an assignment.')
-		.addError(4, 'Expected a conditional expression and instead saw an assignment.')
-		.addError(7, 'Expected a conditional expression and instead saw an assignment.')
-		.addError(12, 'Expected a conditional expression and instead saw an assignment.')
+		.addError(1, 'I thought you were going to type a conditional expression but you typed an assignment instead. Maybe you meant to type === instead of =?')
+		.addError(4, 'I thought you were going to type a conditional expression but you typed an assignment instead. Maybe you meant to type === instead of =?')
+		.addError(7, 'I thought you were going to type a conditional expression but you typed an assignment instead. Maybe you meant to type === instead of =?')
+		.addError(12, 'I thought you were going to type a conditional expression but you typed an assignment instead. Maybe you meant to type === instead of =?')
 
 		// GH-657
-		.addError(14, 'Expected a conditional expression and instead saw an assignment.')
-		.addError(17, 'Expected a conditional expression and instead saw an assignment.')
-		.addError(20, 'Expected a conditional expression and instead saw an assignment.')
-		.addError(25, 'Expected a conditional expression and instead saw an assignment.')
+		.addError(14, 'I thought you were going to type a conditional expression but you typed an assignment instead.')
+		.addError(17, 'I thought you were going to type a conditional expression but you typed an assignment instead.')
+		.addError(20, 'I thought you were going to type a conditional expression but you typed an assignment instead.')
+		.addError(25, 'I thought you were going to type a conditional expression but you typed an assignment instead.')
 
 		// GH-670
 		.addError(28, "Did you mean to return a conditional instead of an assignment?")
@@ -776,8 +776,8 @@ exports.supernew = function (test) {
 
 	TestRun(test)
 		.addError(1, "Weird construction. Is 'new' necessary?")
-		.addError(9, "Missing '()' invoking a constructor.", { character: 1 })
-		.addError(11, "Missing '()' invoking a constructor.", {
+		.addError(9, "I think you're missing the \"()\" to invoke the constructor.", { character: 1 })
+		.addError(11, "I think you're missing the \"()\" to invoke the constructor.", {
 			character: 13
 		})
 		.test(src, {es3: true});
@@ -854,9 +854,9 @@ exports.eqeqeq = function (test) {
 		.test(src, {es3: true});
 
 	TestRun(test)
-		.addError(2, "Expected '===' and instead saw '=='.")
-		.addError(5, "Expected '!==' and instead saw '!='.")
-		.addError(8, "Expected '===' and instead saw '=='.")
+		.addError(2, "I thought you were going to type \"===\" but you typed \"==\".")
+		.addError(5, "I thought you were going to type \"!==\" but you typed \"!=\".")
+		.addError(8, "I thought you were going to type \"===\" but you typed \"==\".")
 		.test(src, { es3: true, eqeqeq: true });
 
 	test.done();
@@ -918,15 +918,15 @@ exports.immed = function (test) {
 
 	// Regression for GH-900
 	TestRun(test)
-		.addError(1, "Expected an assignment or function call and instead saw an expression.")
-		.addError(1, "Missing semicolon.")
-		.addError(1, "Expected an identifier and instead saw ')'.")
-		.addError(1, "Expected an assignment or function call and instead saw an expression.")
-		.addError(1, "Unmatched '{'.")
-		.addError(1, "Unmatched '('.")
+		.addError(1, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(1, "It looks like you're missing a semicolon.")
+		.addError(1, "I thought you were going to type an identifier but you typed ')'.")
+		.addError(1, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(1, "Unmatched \"{\".")
+		.addError(1, "Unmatched \"(\".")
 		.addError(1, "Wrapping non-IIFE function literals in parens is unnecessary.")
-		.addError(1, "Expected an assignment or function call and instead saw an expression.")
-		.addError(1, "Missing semicolon.")
+		.addError(1, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(1, "It looks like you're missing a semicolon.")
 		.test("(function () { if (true) { }());", { es3: true, immed: true });
 
 	test.done();
@@ -973,13 +973,13 @@ exports.passfail = function (test) {
 	];
 
 	TestRun(test)
-		.addError(1, "Missing semicolon.")
-		.addError(2, "Missing semicolon.")
-		.addError(3, "Missing semicolon.")
+		.addError(1, "It looks like you're missing a semicolon.")
+		.addError(2, "It looks like you're missing a semicolon.")
+		.addError(3, "It looks like you're missing a semicolon.")
 		.test(code, { es3: true });
 
 	TestRun(test)
-		.addError(1, "Missing semicolon.")
+		.addError(1, "It looks like you're missing a semicolon.")
 		.test(code, { es3: true, passfail: true });
 
 	test.done();
@@ -1042,7 +1042,7 @@ exports.newcap = function (test) {
 	// When newcap is true, enforce the conventions
 	TestRun(test)
 		.addError(1, 'A constructor name should start with an uppercase letter.')
-		.addError(5, "Missing 'new' prefix when invoking a constructor.")
+		.addError(5, "I think you're missing using 'new' to call a constructor.")
 		.addError(10, "A constructor name should start with an uppercase letter.")
 		.test(src, { es3: true, newcap: true });
 
@@ -1087,14 +1087,14 @@ exports.strict = function (test) {
 		.test(src, { es3: true, strict: true });
 
 	TestRun(test)
-		.addError(4, 'Expected an assignment or function call and instead saw an expression.')
-		.addError(9, 'Missing semicolon.')
-		.addError(28, 'Expected an assignment or function call and instead saw an expression.')
-		.addError(53, 'Expected an assignment or function call and instead saw an expression.')
+		.addError(4, 'I thought you were going to type an assignment or function call but you typed an expression instead.')
+		.addError(9, "It looks like you're missing a semicolon.")
+		.addError(28, 'I thought you were going to type an assignment or function call but you typed an expression instead.')
+		.addError(53, 'I thought you were going to type an assignment or function call but you typed an expression instead.')
 		.test(src2, { es3: true, strict: false });
 
 	TestRun(test)
-		.addError(6, "Missing 'new' prefix when invoking a constructor.")
+		.addError(6, "I think you're missing using 'new' to call a constructor.")
 		.test(src3, {es3 : true});
 
 	TestRun(test).test("var obj = Object({ foo: 'bar' });", { es3: true, strict: true });
@@ -1170,15 +1170,15 @@ exports.white = function (test) {
 	TestRun(test)
 		.addError(1, "Unexpected space after 'hello'.", { character: 15 })
 		.addError(2, "Unexpected space after 'true'.", { character: 16 })
-		.addError(5, "Missing space after 'function'.")
-		.addError(6, "Missing space after 'if'.")
-		.addError(6, "Missing space after ')'.")
+		.addError(5, "I think you're missing a space after \"function\".")
+		.addError(6, "I think you're missing a space after \"if\".")
+		.addError(6, "I think you're missing a space after \")\".")
 		.addError(14, "Unexpected space after 'true'.", { character: 16 })
-		.addError(15, "Missing space after ':'.")
+		.addError(15, "I think you're missing a space after \":\".")
 		.addError(18, "Unexpected space after '('.", { character: 9 })
 		.addError(18, "Unexpected space after 'ex'.", { character: 12 })
-		.addError(55, "Missing space after ','.") // 2 times?
-		.addError(56, "Missing space after '1'.")
+		.addError(55, "I think you're missing a space after \",\".") // 2 times?
+		.addError(56, "I think you're missing a space after \"1\".")
 		.addError(58, "Unexpected space before 'b'.")
 		.addError(58, "Unexpected space after 'a'.")
 		.addError(60, "Unexpected space before 'c'.")
@@ -1291,19 +1291,19 @@ exports.strings = function (test) {
 	var src = fs.readFileSync(__dirname + '/fixtures/strings.js', 'utf8');
 
 	TestRun(test)
-		.addError(9, "Unclosed string.")
-		.addError(10, "Unclosed string.")
-		.addError(15, "Unclosed string.")
+		.addError(9, "Unclosed string! Make sure you end your string with a quote.")
+		.addError(10, "Unclosed string! Make sure you end your string with a quote.")
+		.addError(15, "Unclosed string! Make sure you end your string with a quote.")
 		.addError(23, "Octal literals are not allowed in strict mode.")
 		.test(src, { es3: true, multistr: true });
 
 	TestRun(test)
 		.addError(3, "Bad escaping of EOL. Use option multistr if needed.")
 		.addError(4, "Bad escaping of EOL. Use option multistr if needed.")
-		.addError(9, "Unclosed string.")
-		.addError(10, "Unclosed string.")
+		.addError(9, "Unclosed string! Make sure you end your string with a quote.")
+		.addError(10, "Unclosed string! Make sure you end your string with a quote.")
 		.addError(14, "Bad escaping of EOL. Use option multistr if needed.")
-		.addError(15, "Unclosed string.")
+		.addError(15, "Unclosed string! Make sure you end your string with a quote.")
 		.addError(23, "Octal literals are not allowed in strict mode.")
 		.test(src, { es3: true });
 
@@ -1363,15 +1363,15 @@ exports.scope = function (test) {
 		.addError(12, "'x' used out of scope.")
 		.addError(20, "'aa' used out of scope.")
 		.addError(27, "'bb' used out of scope.")
-		.addError(37, "'cc' is not defined.")
-		.addError(42, "'bb' is not defined.")
+		.addError(37, "\"cc\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(42, "\"bb\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.addError(53, "'xx' used out of scope.")
 		.addError(54, "'yy' used out of scope.")
 		.test(src, {es3: true});
 
 	TestRun(test, 2)
-		.addError(37, "'cc' is not defined.")
-		.addError(42, "'bb' is not defined.")
+		.addError(37, "\"cc\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(42, "\"bb\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(src, { es3: true, funcscope: true });
 
 	test.done();
@@ -1492,14 +1492,14 @@ exports.browser = function (test) {
 	var src = fs.readFileSync(__dirname + '/fixtures/browser.js', 'utf8');
 
 	TestRun(test)
-		.addError(2, "'atob' is not defined.")
-		.addError(3, "'btoa' is not defined.")
-		.addError(6, "'DOMParser' is not defined.")
-		.addError(10, "'XMLSerializer' is not defined.")
-		.addError(14, "'NodeFilter' is not defined.")
-		.addError(15, "'Node' is not defined.")
-		.addError(18, "'MutationObserver' is not defined.")
-		.addError(21, "'SVGElement' is not defined.")
+		.addError(2, "\"atob\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(3, "\"btoa\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(6, "\"DOMParser\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(10, "\"XMLSerializer\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(14, "\"NodeFilter\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(15, "\"Node\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(18, "\"MutationObserver\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(21, "\"SVGElement\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(src, {es3: true, undef: true });
 
 	TestRun(test).test(src, {es3: true, browser: true, undef: true });
@@ -1515,11 +1515,11 @@ exports.unnecessarysemicolon = function (test) {
 	];
 
 	TestRun(test)
-		.addError(2, "Unnecessary semicolon.")
+		.addError(2, "It looks like you have an unnecessary semicolon.")
 		.test(code, {es3: true});
 
 	TestRun(test)
-		.addError(2, "Unnecessary semicolon.")
+		.addError(2, "It looks like you have an unnecessary semicolon.")
 		.test(code, {es3: true, white: true });
 
 	test.done();
@@ -1541,7 +1541,7 @@ exports.blacklist = function (test) {
 
 	// disallow Node in a predef Object
 	TestRun(test)
-		.addError(15, "'Node' is not defined.")
+		.addError(15, "\"Node\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(src, {
 			undef: true,
 			browser: true,
@@ -1549,8 +1549,8 @@ exports.blacklist = function (test) {
 		});
 	// disallow Node and NodeFilter in a predef Array
 	TestRun(test)
-		.addError(14, "'NodeFilter' is not defined.")
-		.addError(15, "'Node' is not defined.")
+		.addError(14, "\"NodeFilter\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(15, "\"Node\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(src, {
 			undef: true,
 			browser: true,
@@ -1558,9 +1558,9 @@ exports.blacklist = function (test) {
 		});
 
 	TestRun(test)
-		.addError(3, "'event' is not defined.")
-		.addError(4, "'foo' is not defined.")
-		.addError(5, "'btoa' is not defined.")
+		.addError(3, "\"event\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(4, "\"foo\" is not defined. Make sure you're spelling it correctly and that you declared it.")
+		.addError(5, "\"btoa\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(code, { es3: true, undef: true });
 
 	test.done();
@@ -1685,11 +1685,11 @@ exports.ignored = function (test) {
 
 	TestRun(test)
 		.addError(4, "A trailing decimal point can be confused with a dot: '12.'.")
-		.addError(12, "Missing semicolon.")
+		.addError(12, "It looks like you're missing a semicolon.")
 		.test(src, { es3: true });
 
 	TestRun(test)
-		.addError(12, "Missing semicolon.")
+		.addError(12, "It looks like you're missing a semicolon.")
 		.test(src, { es3: true, "-W047": true });
 
 	test.done();
@@ -1702,7 +1702,7 @@ exports.unignored = function (test) {
 	var src = fs.readFileSync(__dirname + "/fixtures/unignored.js", "utf-8");
 
 	TestRun(test)
-		.addError(5, "A leading decimal point can be confused with a dot: '.12'.")
+		.addError(5, "Please put a 0 in front of the decimal point: \".12\"!")
 		.test(src, { es3: true });
 
 	test.done();
