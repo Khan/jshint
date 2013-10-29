@@ -145,7 +145,7 @@ exports.testUndefinedAsParam = function (test) {
 
 	// But it must never tolerate reassigning of undefined
 	TestRun(test)
-		.addError(1, "Expected an identifier and instead saw 'undefined' (a reserved word).")
+		.addError(1, "I thought you were going to type an identifier but you typed 'undefined' (a reserved word).")
 		.test(code1);
 
 	test.done();
@@ -176,9 +176,9 @@ exports.noDelete = function (test) {
 exports.switchFallThrough = function (test) {
 	var src = fs.readFileSync(__dirname + '/fixtures/switchFallThrough.js', 'utf8');
 	TestRun(test)
-		.addError(3, "Expected a 'break' statement before 'case'.")
-		.addError(18, "Expected a 'break' statement before 'default'.")
-		.addError(40, "Unexpected ':'.")
+		.addError(3, "Did you forget a 'break' statement before 'case'?")
+		.addError(18, "Did you forget a 'break' statement before 'default'?")
+		.addError(40, "Unexpected \":\".")
 		.test(src);
 
 	test.done();
@@ -190,7 +190,7 @@ exports.switchDefaultFirst = function (test) {
 	var src = fs.readFileSync(__dirname + "/fixtures/switchDefaultFirst.js", "utf8");
 
 	TestRun(test)
-		.addError(5, "Expected a 'break' statement before 'default'.")
+		.addError(5, "Did you forget a 'break' statement before 'default'?")
 		.test(src);
 
 	test.done();
@@ -210,21 +210,21 @@ exports.testVoid = function (test) {
 exports.testMissingSpaces = function (test) {
 	var src = fs.readFileSync(__dirname + '/fixtures/missingspaces.js', 'utf8');
 	TestRun(test)
-		.addError(1, "Missing space after 'function'.", { character: 17 })
-		.addError(2, "Missing space after 'b'.", { character: 6 })
-		.addError(2, "Missing space after '='.", { character: 7 })
-		.addError(2, "Missing space after ')'.", { character: 18 })
-		.addError(3, "Missing space after 'd'.", { character: 6 })
-		.addError(4, "Missing space after ')'.", { character: 13 })
-		.addError(5, "Missing space after '1'.", { character: 13 })
-		.addError(7, "Missing space after '2'.", { character: 10 })
-		.addError(7, "Missing space after '+'.", { character: 11 })
-		.addError(8, "Missing space after '/'.", { character: 14 })
-		.addError(8, "Missing space after '+'.", { character: 15 })
-		.addError(8, "Missing space after 'uid'.", { character: 20 })
-		.addError(8, "Missing space after '+'.", { character: 21 })
-		.addError(8, "Missing space after '/likes?access_token='.", { character: 43 })
-		.addError(8, "Missing space after '+'.", { character: 44 })
+		.addError(1, "I think you're missing a space after \"function\".", { character: 17 })
+		.addError(2, "I think you're missing a space after \"b\".", { character: 6 })
+		.addError(2, "I think you're missing a space after \"=\".", { character: 7 })
+		.addError(2, "I think you're missing a space after \")\".", { character: 18 })
+		.addError(3, "I think you're missing a space after \"d\".", { character: 6 })
+		.addError(4, "I think you're missing a space after \")\".", { character: 13 })
+		.addError(5, "I think you're missing a space after \"1\".", { character: 13 })
+		.addError(7, "I think you're missing a space after \"2\".", { character: 10 })
+		.addError(7, "I think you're missing a space after \"+\".", { character: 11 })
+		.addError(8, "I think you're missing a space after \"/\".", { character: 14 })
+		.addError(8, "I think you're missing a space after \"+\".", { character: 15 })
+		.addError(8, "I think you're missing a space after \"uid\".", { character: 20 })
+		.addError(8, "I think you're missing a space after \"+\".", { character: 21 })
+		.addError(8, "I think you're missing a space after \"/likes?access_token=\".", { character: 43 })
+		.addError(8, "I think you're missing a space after \"+\".", { character: 44 })
 		.test(src, { es3: true, white: true });
 
 	test.done();
@@ -234,7 +234,7 @@ exports.testGoogleClosureLinterCompatibility = function (test) {
 	var code = "var a = function() { return; };";
 
 	TestRun(test)
-		.addError(1, "Missing space after 'function'.")
+		.addError(1, "I think you're missing a space after \"function\".")
 		.test(code, { es3: true, white: true });
 
 	TestRun(test)
@@ -271,7 +271,7 @@ exports.jslintInverted = function (test) {
 exports.jslintRenamed = function (test) {
 	var src = fs.readFileSync(__dirname + '/fixtures/jslintRenamed.js', 'utf8');
 	TestRun(test)
-		.addError(4, "Expected '===' and instead saw '=='.")
+		.addError(4, "I thought you were going to type \"===\" but you typed \"==\".")
 		.test(src);
 
 	test.done();
@@ -338,7 +338,7 @@ exports.argsInCatchReused = function (test) {
 	TestRun(test)
 		.addError(6, "'e' is already defined.")
 		.addError(12, "Do not assign to the exception parameter.")
-		.addError(23, "'e' is not defined.")
+		.addError(23, "\"e\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(src, { es3: true, undef: true });
 
 	test.done();
@@ -346,7 +346,7 @@ exports.argsInCatchReused = function (test) {
 
 exports.testRawOnError = function (test) {
 	JSHINT(';', { maxerr: 1 });
-	test.equal(JSHINT.errors[0].raw, 'Unnecessary semicolon.');
+	test.equal(JSHINT.errors[0].raw, 'It looks like you have an unnecessary semicolon.');
 	test.equal(JSHINT.errors[1].raw, 'Too many errors.');
 	test.equal(JSHINT.errors[2], null);
 
@@ -357,16 +357,16 @@ exports.yesEmptyStmt = function (test) {
 	var src = fs.readFileSync(__dirname + '/fixtures/emptystmt.js', 'utf8');
 
 	TestRun(test)
-		.addError(1, "Expected an identifier and instead saw ';'.")
-		.addError(6, "Expected an assignment or function call and instead saw an expression.")
-		.addError(10, "Unnecessary semicolon.")
-		.addError(17, "Unnecessary semicolon.")
+		.addError(1, "I thought you were going to type an identifier but you typed ';'.")
+		.addError(6, "I thought you were going to type an assignment or function call but you typed an expression instead.")
+		.addError(10, "It looks like you have an unnecessary semicolon.")
+		.addError(17, "It looks like you have an unnecessary semicolon.")
 		.test(src, { es3: true, curly: false });
 
 	TestRun(test)
-		.addError(1, "Expected an identifier and instead saw ';'.")
-		.addError(10, "Unnecessary semicolon.")
-		.addError(17, "Unnecessary semicolon.")
+		.addError(1, "I thought you were going to type an identifier but you typed ';'.")
+		.addError(10, "It looks like you have an unnecessary semicolon.")
+		.addError(17, "It looks like you have an unnecessary semicolon.")
 		.test(src, { es3: true, curly: false, expr: true });
 
 	test.done();
@@ -389,9 +389,9 @@ exports.insideEval = function (test) {
 		// The "TestRun" class (and these errors) probably needs some
 		// facility for checking the expected scope of the error
 		.addError(1, "Unexpected early end of program.")
-		.addError(1, "Expected an identifier and instead saw '(end)'.")
-		.addError(1, "Expected ')' and instead saw ''.")
-		.addError(1, "Missing semicolon.")
+		.addError(1, "I thought you were going to type an identifier but you typed '(end)'.")
+		.addError(1, "I thought you were going to type \")\" but you typed \"\".")
+		.addError(1, "It looks like you're missing a semicolon.")
 
 		.test(src, { es3: true, evil: false });
 
@@ -415,7 +415,7 @@ exports.noExcOnTooManyUndefined = function (test) {
 	}
 
 	TestRun(test)
-		.addError(1, "'a' is not defined.")
+		.addError(1, "\"a\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(code, { es3: true, undef: true, maxerr: 1 });
 
 	test.done();
@@ -425,8 +425,8 @@ exports.defensiveSemicolon = function (test) {
 	var src = fs.readFileSync(__dirname + '/fixtures/gh-226.js', 'utf8');
 
 	TestRun(test)
-		.addError(16, "Unnecessary semicolon.")
-		.addError(17, "Unnecessary semicolon.")
+		.addError(16, "It looks like you have an unnecessary semicolon.")
+		.addError(17, "It looks like you have an unnecessary semicolon.")
 		.test(src, { es3: true, expr: true, laxbreak: true });
 
 	test.done();
@@ -500,7 +500,7 @@ exports.missingRadix = function (test) {
 	var code = "parseInt(20);";
 
 	TestRun(test)
-		.addError(1, "Missing radix parameter.", {
+		.addError(1, "It looks like you're missing a radix parameter.", {
 			character: 12
 		})
 		.test(code, {es3: true});
@@ -547,19 +547,19 @@ exports.testReserved = function (test) {
 	var src = fs.readFileSync(__dirname + "/fixtures/reserved.js", "utf8");
 
 	TestRun(test)
-		.addError(1, "Expected an identifier and instead saw 'volatile' (a reserved word).")
-		.addError(5, "Expected an identifier and instead saw 'let' (a reserved word).")
-		.addError(10, "Expected an identifier and instead saw 'let' (a reserved word).")
-		.addError(13, "Expected an identifier and instead saw 'class' (a reserved word).")
+		.addError(1, "I thought you were going to type an identifier but you typed 'volatile' (a reserved word).")
+		.addError(5, "I thought you were going to type an identifier but you typed 'let' (a reserved word).")
+		.addError(10, "I thought you were going to type an identifier but you typed 'let' (a reserved word).")
+		.addError(13, "I thought you were going to type an identifier but you typed 'class' (a reserved word).")
 		.addError(13, "Reserved words as properties can be used under the 'es5' option.")
-		.addError(14, "Expected an identifier and instead saw 'else' (a reserved word).")
-		.addError(15, "Expected an identifier and instead saw 'throws' (a reserved word).")
-		.addError(16, "Expected an identifier and instead saw 'protected' (a reserved word).")
+		.addError(14, "I thought you were going to type an identifier but you typed 'else' (a reserved word).")
+		.addError(15, "I thought you were going to type an identifier but you typed 'throws' (a reserved word).")
+		.addError(16, "I thought you were going to type an identifier but you typed 'protected' (a reserved word).")
 		.test(src, {es3: true});
 
 	TestRun(test)
-		.addError(5, "Expected an identifier and instead saw 'let' (a reserved word).")
-		.addError(10, "Expected an identifier and instead saw 'let' (a reserved word).")
+		.addError(5, "I thought you were going to type an identifier but you typed 'let' (a reserved word).")
+		.addError(10, "I thought you were going to type an identifier but you typed 'let' (a reserved word).")
 		.test(src, {}); // es5
 
 	test.done();
@@ -571,23 +571,23 @@ exports.testES5Reserved = function (test) {
 	var src = fs.readFileSync(__dirname + "/fixtures/es5Reserved.js", "utf8");
 
 	TestRun(test)
-		.addError(2, "Expected an identifier and instead saw 'default' (a reserved word).")
+		.addError(2, "I thought you were going to type an identifier but you typed 'default' (a reserved word).")
 		.addError(2, "Reserved words as properties can be used under the 'es5' option.")
-		.addError(3, "Unexpected 'in'.")
-		.addError(3, "Expected an identifier and instead saw 'in' (a reserved word).")
-		.addError(6, "Expected an identifier and instead saw 'default' (a reserved word).")
-		.addError(7, "Expected an identifier and instead saw 'new' (a reserved word).")
-		.addError(8, "Expected an identifier and instead saw 'class' (a reserved word).")
-		.addError(9, "Expected an identifier and instead saw 'default' (a reserved word).")
-		.addError(10, "Expected an identifier and instead saw 'in' (a reserved word).")
-		.addError(11, "Expected an identifier and instead saw 'in' (a reserved word).")
+		.addError(3, "Unexpected \"in\".")
+		.addError(3, "I thought you were going to type an identifier but you typed 'in' (a reserved word).")
+		.addError(6, "I thought you were going to type an identifier but you typed 'default' (a reserved word).")
+		.addError(7, "I thought you were going to type an identifier but you typed 'new' (a reserved word).")
+		.addError(8, "I thought you were going to type an identifier but you typed 'class' (a reserved word).")
+		.addError(9, "I thought you were going to type an identifier but you typed 'default' (a reserved word).")
+		.addError(10, "I thought you were going to type an identifier but you typed 'in' (a reserved word).")
+		.addError(11, "I thought you were going to type an identifier but you typed 'in' (a reserved word).")
 		.test(src, {es3: true});
 
 	TestRun(test)
-		.addError(6, "Expected an identifier and instead saw 'default' (a reserved word).")
-		.addError(7, "Expected an identifier and instead saw 'new' (a reserved word).")
-		.addError(8, "Expected an identifier and instead saw 'class' (a reserved word).")
-		.addError(11, "Expected an identifier and instead saw 'in' (a reserved word).")
+		.addError(6, "I thought you were going to type an identifier but you typed 'default' (a reserved word).")
+		.addError(7, "I thought you were going to type an identifier but you typed 'new' (a reserved word).")
+		.addError(8, "I thought you were going to type an identifier but you typed 'class' (a reserved word).")
+		.addError(11, "I thought you were going to type an identifier but you typed 'in' (a reserved word).")
 		.test(src, {}); // es5
 
 	test.done();
@@ -597,7 +597,7 @@ exports.testCatchBlocks = function (test) {
 	var src = fs.readFileSync(__dirname + '/fixtures/gh247.js', 'utf8');
 
 	TestRun(test)
-		.addError(11, "'w' is not defined.")
+		.addError(11, "\"w\" is not defined. Make sure you're spelling it correctly and that you declared it.")
 		.test(src, { es3: true, undef: true, devel: true });
 
 	src = fs.readFileSync(__dirname + '/fixtures/gh618.js', 'utf8');
@@ -617,7 +617,7 @@ exports.testNumericParams = function (test) {
 		.test("/*jshint maxparams:4, indent:3, maxlen:false */");
 
 	TestRun(test)
-		.addError(1, "Expected a small integer or 'false' and instead saw 'face'.")
+		.addError(1, "I thought you were going to type a number or 'false' but you typed 'face'.")
 		.test("/*jshint maxparams:face */");
 
 	test.done();

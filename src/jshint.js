@@ -960,7 +960,11 @@ var JSHINT = (function () {
 			if (state.tokens.curr.nud) {
 				left = state.tokens.curr.nud();
 			} else {
-				error("E030", state.tokens.curr, state.tokens.curr.id);
+				if (state.tokens.curr.value === ",") {
+					error("E052", state.tokens.curr, state.tokens.curr.id);
+				} else {
+					error("E030", state.tokens.curr, state.tokens.curr.id);
+				}
 			}
 
 			while (rbp < state.tokens.next.lbp && !isEndOfExpr()) {
@@ -1165,7 +1169,13 @@ var JSHINT = (function () {
 
 				/* falls through */
 			case ")":
-				error("E024", state.tokens.next, state.tokens.next.value);
+				var errorCode = "E024";
+				if (state.tokens.next.value === ")") {
+					errorCode = "E053";
+				} else if (state.tokens.next.value === ",") {
+					errorCode = "E052";
+				}
+				error(errorCode, state.tokens.next, state.tokens.next.value);
 				return false;
 			}
 		}
@@ -2960,6 +2970,10 @@ var JSHINT = (function () {
 		}
 		switch (id) {
 		case "=":
+			if (!paren && !state.option.boss) {
+				warning("W123");
+			}
+			break;
 		case "+=":
 		case "-=":
 		case "*=":

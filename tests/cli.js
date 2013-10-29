@@ -153,7 +153,7 @@ exports.group = {
 				throw err;
 			}
 
-			test.equal(rep.reporter.args[0][0][0].error.raw, "Missing semicolon.");
+			test.equal(rep.reporter.args[0][0][0].error.raw, "It looks like you're missing a semicolon.");
 			test.ok(rep.reporter.calledOnce);
 		}
 
