@@ -244,20 +244,21 @@ var JSHINT = (function () {
 		extraModules = [],
 		emitter = new events.EventEmitter(),
 
-		hasOwnProperty = Object.prototype.hasOwnProperty;
+		hasOwnProperty = Object.prototype.hasOwnProperty,
+		_ = {};
 
-	function _has(obj, key) {
+	_.has = function (obj, key) {
 		return hasOwnProperty.call(obj, key);
-	}
+	};
 
-	function _contains(obj, target) {
+	_.contains = function (obj, target) {
 		if (obj === null || obj === undefined) {
 			return false;
 		}
 		return obj.indexOf(target) !== -1;
-	}
+	};
 
-	function _reject(list, predicate) {
+	_.reject = function (list, predicate) {
 		var results = [];
 		for (var i = 0; i < list.length; i++) {
 			if (!predicate(list[i], i)) {
@@ -265,7 +266,7 @@ var JSHINT = (function () {
 			}
 		}
 		return results;
-	}
+	};
 
 	function checkOption(name, t) {
 		name = name.trim();
@@ -336,7 +337,7 @@ var JSHINT = (function () {
 	function combine(t, o) {
 		var n;
 		for (n in o) {
-			if (_has(o, n) && !_has(JSHINT.blacklist, n)) {
+			if (_.has(o, n) && !_.has(JSHINT.blacklist, n)) {
 				t[n] = o[n];
 			}
 		}
@@ -553,18 +554,18 @@ var JSHINT = (function () {
 	function addlabel(t, type, tkn, islet) {
 		// Define t in the current function in the current scope.
 		if (type === "exception") {
-			if (_has(funct["(context)"], t)) {
+			if (_.has(funct["(context)"], t)) {
 				if (funct[t] !== true && !state.option.node) {
 					warning("W002", state.tokens.next, t);
 				}
 			}
 		}
 
-		if (_has(funct, t) && !funct["(global)"]) {
+		if (_.has(funct, t) && !funct["(global)"]) {
 			if (funct[t] === true) {
 				if (state.option.latedef) {
-					if ((state.option.latedef === true && _contains([funct[t], type], "unction")) ||
-							!_contains([funct[t], type], "unction")) {
+					if ((state.option.latedef === true && _.contains([funct[t], type], "unction")) ||
+							!_.contains([funct[t], type], "unction")) {
 						warning("W003", state.tokens.next, t);
 					}
 				}
@@ -594,10 +595,10 @@ var JSHINT = (function () {
 
 			if (funct["(global)"]) {
 				global[t] = funct;
-				if (_has(implied, t)) {
+				if (_.has(implied, t)) {
 					if (state.option.latedef) {
-						if ((state.option.latedef === true && _contains([funct[t], type], "unction")) ||
-								!_contains([funct[t], type], "unction")) {
+						if ((state.option.latedef === true && _.contains([funct[t], type], "unction")) ||
+								!_.contains([funct[t], type], "unction")) {
 							warning("W003", state.tokens.next, t);
 						}
 					}
@@ -635,7 +636,7 @@ var JSHINT = (function () {
 			combine(predefined, predef);
 
 			for (var key in predef) {
-				if (_has(predef, key)) {
+				if (_.has(predef, key)) {
 					declared[key] = nt;
 				}
 			}
@@ -792,7 +793,7 @@ var JSHINT = (function () {
 						break;
 					case "line":
 						// Any errors or warnings that happened on the current line, make them go away.
-						JSHINT.errors = _reject(JSHINT.errors, function (error) {
+						JSHINT.errors = _.reject(JSHINT.errors, function (error) {
 							// nt.line returns to the current line
 							return error.line === nt.line;
 						});
@@ -1404,7 +1405,7 @@ var JSHINT = (function () {
 		];
 
 		if (right.type === "(identifier)" && right.value === "typeof" && left.type === "(string)")
-			return !_contains(values, left.value);
+			return !_.contains(values, left.value);
 
 		return false;
 	}
@@ -1664,7 +1665,7 @@ var JSHINT = (function () {
 		}
 
 		// detect a destructuring assignment
-		if (_has(["[", "{"], t.value)) {
+		if (_.has(["[", "{"], t.value)) {
 			if (lookupBlockType().isDestAssign) {
 				if (!state.option.inESNext()) {
 					warning("W104", state.tokens.curr, "destructuring expression");
@@ -1877,7 +1878,7 @@ var JSHINT = (function () {
 				if (isfunc) {
 					m = {};
 					for (d in state.directive) {
-						if (_has(state.directive, d)) {
+						if (_.has(state.directive, d)) {
 							m[d] = state.directive[d];
 						}
 					}
@@ -1919,7 +1920,7 @@ var JSHINT = (function () {
 
 				if (!stmt) {
 					for (d in state.directive) {
-						if (_has(state.directive, d)) {
+						if (_.has(state.directive, d)) {
 							m[d] = state.directive[d];
 						}
 					}
@@ -2024,7 +2025,7 @@ var JSHINT = (function () {
 				funct = f;
 			}
 			var block;
-			if (_has(funct, "(blockscope)")) {
+			if (_.has(funct, "(blockscope)")) {
 				block = funct["(blockscope)"].getlabel(v);
 			}
 
@@ -2417,7 +2418,7 @@ var JSHINT = (function () {
 				default:
 					if (c.id !== "function") {
 						i = c.value.substr(0, 1);
-						if (state.option.newcap && (i < "A" || i > "Z") && !_has(global, c.value)) {
+						if (state.option.newcap && (i < "A" || i > "Z") && !_.has(global, c.value)) {
 							warning("W055", state.tokens.curr);
 						}
 					}
@@ -2677,7 +2678,7 @@ var JSHINT = (function () {
 		advance("(");
 		funct["(comparray)"].setState("define");
 		res.left = expression(130);
-		if (_contains(["in", "of"], state.tokens.next.value)) {
+		if (_.contains(["in", "of"], state.tokens.next.value)) {
 			advance();
 		} else {
 			error("E045", state.tokens.curr);
@@ -2787,7 +2788,7 @@ var JSHINT = (function () {
 			if (parsed instanceof Array) {
 				for (var i in parsed) {
 					curr = parsed[i];
-					if (_contains(["{", "["], curr.id)) {
+					if (_.contains(["{", "["], curr.id)) {
 						for (t in curr.left) {
 							t = tokens[t];
 							if (t.id) {
@@ -2824,7 +2825,7 @@ var JSHINT = (function () {
 		}
 
 		for (;;) {
-			if (_contains(["{", "["], state.tokens.next.id)) {
+			if (_.contains(["{", "["], state.tokens.next.id)) {
 				tokens = destructuringExpression();
 				for (t in tokens) {
 					t = tokens[t];
@@ -3018,7 +3019,7 @@ var JSHINT = (function () {
 			var tag = "";
 
 			function saveProperty(name, tkn) {
-				if (props[name] && _has(props, name))
+				if (props[name] && _.has(props, name))
 					warning("W075", state.tokens.next, i);
 				else
 					props[name] = {};
@@ -3028,7 +3029,7 @@ var JSHINT = (function () {
 			}
 
 			function saveSetter(name, tkn) {
-				if (props[name] && _has(props, name)) {
+				if (props[name] && _.has(props, name)) {
 					if (props[name].basic || props[name].setter)
 						warning("W075", state.tokens.next, i);
 				} else {
@@ -3040,7 +3041,7 @@ var JSHINT = (function () {
 			}
 
 			function saveGetter(name) {
-				if (props[name] && _has(props, name)) {
+				if (props[name] && _.has(props, name)) {
 					if (props[name].basic || props[name].getter)
 						warning("W075", state.tokens.next, i);
 				} else {
@@ -3186,7 +3187,7 @@ var JSHINT = (function () {
 			// Check for lonely setters if in the ES5 mode.
 			if (state.option.inES5()) {
 				for (var name in props) {
-					if (_has(props, name) && props[name].setter && !props[name].getter) {
+					if (_.has(props, name) && props[name].setter && !props[name].getter) {
 						warning("W078", props[name].setterToken);
 					}
 				}
@@ -3206,7 +3207,7 @@ var JSHINT = (function () {
 		}
 		var nextInnerDE = function () {
 			var ident;
-			if (_contains(["[", "{"], state.tokens.next.value)) {
+			if (_.contains(["[", "{"], state.tokens.next.value)) {
 				ids = destructuringExpression();
 				for (var id in ids) {
 					id = ids[id];
@@ -3280,7 +3281,7 @@ var JSHINT = (function () {
 		for (;;) {
 			var names = [];
 			nonadjacent(state.tokens.curr, state.tokens.next);
-			if (_contains(["{", "["], state.tokens.next.value)) {
+			if (_.contains(["{", "["], state.tokens.next.value)) {
 				tokens = destructuringExpression();
 				lone = false;
 			} else {
@@ -3351,7 +3352,7 @@ var JSHINT = (function () {
 		for (;;) {
 			var names = [];
 			nonadjacent(state.tokens.curr, state.tokens.next);
-			if (_contains(["{", "["], state.tokens.next.value)) {
+			if (_.contains(["{", "["], state.tokens.next.value)) {
 				tokens = destructuringExpression();
 				lone = false;
 			} else {
@@ -3431,7 +3432,7 @@ var JSHINT = (function () {
 		for (;;) {
 			var names = [];
 			nonadjacent(state.tokens.curr, state.tokens.next);
-			if (_contains(["{", "["], state.tokens.next.value)) {
+			if (_.contains(["{", "["], state.tokens.next.value)) {
 				tokens = destructuringExpression();
 				lone = false;
 			} else {
@@ -3899,11 +3900,11 @@ var JSHINT = (function () {
 		do {
 			nextop = peek(i);
 			++i;
-		} while (!_contains(inof, nextop.value) && nextop.value !== ";" &&
+		} while (!_.contains(inof, nextop.value) && nextop.value !== ";" &&
 					nextop.type !== "(end)");
 
 		// if we're in a for (… in|of …) statement
-		if (_contains(inof, nextop.value)) {
+		if (_.contains(inof, nextop.value)) {
 			if (!state.option.inESNext() && nextop.value === "of") {
 				error("W104", nextop, "for of");
 			}
@@ -4254,15 +4255,15 @@ var JSHINT = (function () {
 		var i = -1;
 		var bracketStack = 0;
 		var ret = {};
-		if (_contains(["[", "{"], state.tokens.curr.value))
+		if (_.contains(["[", "{"], state.tokens.curr.value))
 			bracketStack += 1;
 		do {
 			pn = (i === -1) ? state.tokens.next : peek(i);
 			pn1 = peek(i + 1);
 			i = i + 1;
-			if (_contains(["[", "{"], pn.value)) {
+			if (_.contains(["[", "{"], pn.value)) {
 				bracketStack += 1;
-			} else if (_contains(["]", "}"], pn.value)) {
+			} else if (_.contains(["]", "}"], pn.value)) {
 				bracketStack -= 1;
 			}
 			if (pn.identifier && pn.value === "for" && bracketStack === 1) {
@@ -4270,7 +4271,7 @@ var JSHINT = (function () {
 				ret.notJson = true;
 				break;
 			}
-			if (_contains(["}", "]"], pn.value) && pn1.value === "=" && bracketStack === 0) {
+			if (_.contains(["}", "]"], pn.value) && pn1.value === "=" && bracketStack === 0) {
 				ret.isDestAssign = true;
 				ret.notJson = true;
 				break;
@@ -4356,7 +4357,7 @@ var JSHINT = (function () {
 					_current = _carrays[_carrays.length - 1];
 				},
 				setState: function (s) {
-					if (_contains(["use", "define", "generate", "filter"], s))
+					if (_.contains(["use", "define", "generate", "filter"], s))
 						_current.mode = s;
 				},
 				check: function (v) {
@@ -4528,7 +4529,7 @@ var JSHINT = (function () {
 
 			getlabel: function (l) {
 				for (var i = _variables.length - 1 ; i >= 0; --i) {
-					if (_has(_variables[i], l)) {
+					if (_.has(_variables[i], l)) {
 						return _variables[i];
 					}
 				}
@@ -4536,7 +4537,7 @@ var JSHINT = (function () {
 
 			current: {
 				has: function (t) {
-					return _has(_current, t);
+					return _.has(_current, t);
 				},
 				add: function (t, type, tok) {
 					_current[t] = { "(type)" : type,
@@ -4721,7 +4722,7 @@ var JSHINT = (function () {
 
 		// Check options
 		for (var name in o) {
-			if (_has(o, name)) {
+			if (_.has(o, name)) {
 				checkOption(name, state.tokens.curr);
 			}
 		}
@@ -4840,7 +4841,7 @@ var JSHINT = (function () {
 					return;
 
 				// Variable is in global scope and defined as exported.
-				if (func["(global)"] && _has(exported, key)) {
+				if (func["(global)"] && _.has(exported, key)) {
 					return;
 				}
 
@@ -4864,7 +4865,7 @@ var JSHINT = (function () {
 				}
 
 				for (var key in func) {
-					if (_has(func, key)) {
+					if (_.has(func, key)) {
 						checkUnused(func, key);
 					}
 				}
@@ -4898,7 +4899,7 @@ var JSHINT = (function () {
 			});
 
 			for (var key in declared) {
-				if (_has(declared, key) && !_has(global, key)) {
+				if (_.has(declared, key) && !_.has(global, key)) {
 					warnUnused(key, declared[key], "var");
 				}
 			}
@@ -4961,7 +4962,7 @@ var JSHINT = (function () {
 		}
 
 		for (n in implied) {
-			if (_has(implied, n)) {
+			if (_.has(implied, n)) {
 				implieds.push({
 					name: n,
 					line: implied[n]
