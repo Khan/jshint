@@ -1,9 +1,7 @@
 "use strict";
 
-var _ = require("underscore");
-
 // XXX(jeresig): Used for i18n string extraction
-var $ = { _: _.identity };
+var $ = { _: function (msg) { return msg; } };
 
 var errors = {
 	// JSHint options
@@ -223,14 +221,14 @@ exports.errors = {};
 exports.warnings = {};
 exports.info = {};
 
-_.each(errors, function (desc, code) {
-	exports.errors[code] = { code: code, desc: desc };
-});
+for (var code in errors) {
+	exports.errors[code] = { code: code, desc: errors[code] };
+}
 
-_.each(warnings, function (desc, code) {
-	exports.warnings[code] = { code: code, desc: desc };
-});
+for (var code in warnings) {
+	exports.warnings[code] = { code: code, desc: warnings[code] };
+}
 
-_.each(info, function (desc, code) {
-	exports.info[code] = { code: code, desc: desc };
-});
+for (var code in info) {
+	exports.info[code] = { code: code, desc: info[code] };
+}
