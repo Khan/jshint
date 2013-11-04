@@ -32,7 +32,6 @@
 /*global console:true */
 /*exported console */
 
-var _        = require("underscore");
 var events   = require("events");
 var vars     = require("./vars.js");
 var messages = require("./messages.js");
@@ -235,7 +234,21 @@ var JSHINT = (function () {
 		warnings,
 
 		extraModules = [],
-		emitter = new events.EventEmitter();
+		emitter = new events.EventEmitter(),
+        
+		hasOwnProperty = Object.prototype.hasOwnProperty,
+		_ = {};
+
+	_.has = function(obj, key) {
+		return hasOwnProperty.call(obj, key);
+	};
+
+	_.contains = function(obj, target) {
+		if (obj === null || obj === undefined) {
+			return false;
+		}
+		return obj.indexOf(target) !== -1;
+	};
 
 	function checkOption(name, t) {
 		name = name.trim();
@@ -3112,17 +3125,17 @@ var JSHINT = (function () {
 	}
 	function destructuringExpressionMatch(tokens, value) {
 		if (value.first) {
-			_.zip(tokens, value.first).forEach(function (val) {
-				var token = val[0];
-				var value = val[1];
-				if (token && value) {
-					token.first = value;
-				} else if (token && token.first && !value) {
+			for (var i = 0; i < tokens.length && i < value.first.length; i++) {
+				var token = tokens[i];
+				var val = value.first[i];
+				if (token && val) {
+					token.first = val;
+				} else if (token && token.first && !val) {
 					warning("W080", token.first, token.first.value);
 				} /* else {
 					XXX value is discarded: wouldn't it need a warning ?
 				} */
-			});
+			}
 		}
 	}
 
@@ -4371,7 +4384,7 @@ var JSHINT = (function () {
 			unstack: function () {
 				_checkBlockLabels();
 				_variables.splice(_variables.length - 1, 1);
-				_current = _.last(_variables);
+				_current = _variables[_variables.length - 1];
 			},
 
 			getlabel: function (l) {
