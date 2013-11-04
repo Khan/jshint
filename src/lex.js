@@ -4,7 +4,6 @@
 
 "use strict";
 
-var _      = require("underscore");
 var events = require("events");
 var reg    = require("./reg.js");
 var state  = require("./state.js").state;
@@ -1440,7 +1439,7 @@ Lexer.prototype = {
 					this.prereg = true;
 				}
 
-				if (_.has(state.syntax, value)) {
+				if (state.syntax.hasOwnProperty(value)) {
 					obj = Object.create(state.syntax[value] || state.syntax["(error)"]);
 
 					// If this can't be a reserved keyword, reset the object.
