@@ -5,232 +5,246 @@ if (typeof window === 'undefined') window = {};
 (function () {
 var require;
 require=(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
-(function(){"use strict";
+// shim for using process in browser
 
-// XXX(jeresig): Used for i18n string extraction
-var $ = { _: function (msg) { return msg; } };
+var process = module.exports = {};
 
-var errors = {
-	// JSHint options
-	E001: $._("Bad option: '{a}'."),
-	E002: $._("Bad option value."),
+process.nextTick = (function () {
+    var canSetImmediate = typeof window !== 'undefined'
+    && window.setImmediate;
+    var canPost = typeof window !== 'undefined'
+    && window.postMessage && window.addEventListener
+    ;
 
-	// JSHint input
-	E003: $._("Expected a JSON value."),
-	E004: $._("Input is neither a string nor an array of strings."),
-	E005: $._("Input is empty."),
-	E006: $._("Unexpected early end of program."),
+    if (canSetImmediate) {
+        return function (f) { return window.setImmediate(f) };
+    }
 
-	// Strict mode
-	E007: $._("Missing \"use strict\" statement."),
-	E008: $._("Strict violation."),
-	E009: $._("Option 'validthis' can't be used in a global scope."),
-	E010: $._("'with' is not allowed in strict mode."),
+    if (canPost) {
+        var queue = [];
+        window.addEventListener('message', function (ev) {
+            if (ev.source === window && ev.data === 'process-tick') {
+                ev.stopPropagation();
+                if (queue.length > 0) {
+                    var fn = queue.shift();
+                    fn();
+                }
+            }
+        }, true);
 
-	// Constants
-	E011: $._("const '{a}' has already been declared."),
-	E012: $._("const '{a}' is initialized to 'undefined'."),
-	E013: $._("Attempting to override '{a}' which is a constant."),
+        return function nextTick(fn) {
+            queue.push(fn);
+            window.postMessage('process-tick', '*');
+        };
+    }
 
-	// Regular expressions
-	E014: $._("A regular expression literal can be confused with '/='."),
-	E015: $._("Unclosed regular expression."),
-	E016: $._("Invalid regular expression."),
+    return function nextTick(fn) {
+        setTimeout(fn, 0);
+    };
+})();
 
-	// Tokens
-	E017: $._("It looks like your comment isn't closed. Use \"*/\" to end a multi-line comment."),
-	E018: $._("It looks like you never started your comment. Use \"/*\" to start a multi-line comment."),
-	E019: $._("Unmatched \"{a}\"."),
-	E020: $._("I thought you were going to type \"{a}\" to match \"{b}\" from line {c} but you typed \"{d}\""),
-	E021: $._("I thought you were going to type \"{a}\" but you typed \"{b}\"!"),
-	E022: $._("Line breaking error '{a}'."),
-	E023: $._("I think you're missing a \"{a}\"!"),
-	E024: $._("Unexpected \"{a}\"."),
-	E025: $._("I think you're missing ':' on a case clause."),
-	E026: $._("I think you're missing a '}' to match '{' from line {a}."),
-	E027: $._("I think you're missing a ']' to match '[' from line {a}."),
-	E028: $._("Illegal comma."),
-	E029: $._("Unclosed string! Make sure you end your string with a quote."),
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
 
-	// Everything else
-	E030: $._("I thought you were going to type an identifier but you typed '{a}'."),
-	E031: $._("The left side of an assignment must be a single variable name, not an expression."), // FIXME: Rephrase
-	E032: $._("I thought you were going to type a number or 'false' but you typed '{a}'."),
-	E033: $._("I thought you were going to type an operator but you typed '{a}'."),
-	E034: $._("get/set are ES5 features."),
-	E035: $._("I think you're missing a property name."),
-	E036: $._("I thought you were going to type a statement but you typed a block instead."),
-	E037: null, // Vacant
-	E038: null, // Vacant
-	E039: $._("Function declarations are not invocable. Wrap the whole function invocation in parens."),
-	E040: $._("Each value should have its own case label."),
-	E041: $._("Unrecoverable syntax error."),
-	E042: $._("Stopping."),
-	E043: $._("Too many errors."),
-	E044: $._("'{a}' is already defined and can't be redefined."),
-	E045: $._("Invalid for each loop."),
-	E046: $._("A yield statement shall be within a generator function (with syntax: `function*`)"),
-	E047: $._("A generator function shall contain a yield statement."),
-	E048: $._("Let declaration not directly within block."),
-	E049: $._("A {a} cannot be named '{b}'."),
-	E050: $._("Mozilla requires the yield expression to be parenthesized here."),
-	E051: $._("Regular parameters cannot come after default parameters."),
-	E052: $._("I think you meant to type a value or variable name before that comma?"),
-	E053: $._("I think you either have an extra comma or a missing argument?")
-};
-
-var warnings = {
-	W001: $._("'hasOwnProperty' is a really bad name."),
-	W002: $._("Value of '{a}' may be overwritten in IE 8 and earlier."),
-	W003: $._("'{a}' was used before it was defined."),
-	W004: $._("'{a}' is already defined."),
-	W005: $._("A dot following a number can be confused with a decimal point."),
-	W006: $._("Confusing minuses."),
-	W007: $._("Confusing pluses."),
-	W008: $._("Please put a 0 in front of the decimal point: \"{a}\"!"),
-	W009: $._("The array literal notation [] is preferrable."),
-	W010: $._("The object literal notation {} is preferrable."),
-	W011: $._("Unexpected space after '{a}'."),
-	W012: $._("Unexpected space before '{a}'."),
-	W013: $._("I think you're missing a space after \"{a}\"."),
-	W014: $._("Bad line breaking before '{a}'."),
-	W015: $._("Expected '{a}' to have an indentation at {b} instead at {c}."),
-	W016: $._("Unexpected use of '{a}'."),
-	W017: $._("Bad operand."),
-	W018: $._("Confusing use of '{a}'."),
-	W019: $._("Use the isNaN function to compare with NaN."),
-	W020: $._("Read only."),
-	W021: $._("'{a}' is a function."),
-	W022: $._("Do not assign to the exception parameter."),
-	W023: $._("I thought you were going to type an identifier in an assignment but you typed a function invocation instead."),
-	W024: $._("I thought you were going to type an identifier but you typed '{a}' (a reserved word)."),
-	W025: $._("I think you're missing the name in your function declaration."),
-	W026: $._("Inner functions should be listed at the top of the outer function."),
-	W027: $._("Unreachable '{a}' after '{b}'."),
-	W028: $._("Label '{a}' on {b} statement."),
-	W030: $._("I thought you were going to type an assignment or function call but you typed an expression instead."),
-	W031: $._("Do not use 'new' for side effects."),
-	W032: $._("It looks like you have an unnecessary semicolon."),
-	W033: $._("It looks like you're missing a semicolon."),
-	W034: $._("Unnecessary directive \"{a}\"."),
-	W035: $._("Empty block."),
-	W036: $._("Unexpected /*member '{a}'."),
-	W037: $._("'{a}' is a statement label."),
-	W038: $._("'{a}' used out of scope."),
-	W039: $._("'{a}' is not allowed."),
-	W040: $._("Possible strict violation."),
-	W041: $._("Use '{a}' to compare with '{b}'."),
-	W042: $._("Avoid EOL escaping."),
-	W043: $._("Bad escaping of EOL. Use option multistr if needed."),
-	W044: $._("Bad or unnecessary escaping."),
-	W045: $._("Bad number '{a}'."),
-	W046: $._("Don't use extra leading zeros \"{a}\"."),
-	W047: $._("A trailing decimal point can be confused with a dot: '{a}'."),
-	W048: $._("Unexpected control character in regular expression."),
-	W049: $._("Unexpected escaped character '{a}' in regular expression."),
-	W050: $._("JavaScript URL."),
-	W051: $._("Variables should not be deleted."),
-	W052: $._("Unexpected '{a}'."),
-	W053: $._("Do not use {a} as a constructor."),
-	W054: $._("The Function constructor is a form of eval."),
-	W055: $._("A constructor name should start with an uppercase letter."),
-	W056: $._("Bad constructor."),
-	W057: $._("Weird construction. Is 'new' necessary?"),
-	W058: $._("I think you're missing the \"()\" to invoke the constructor."),
-	W059: $._("Avoid arguments.{a}."),
-	W060: $._("document.write can be a form of eval."),
-	W061: $._("eval can be harmful."),
-	W062: $._("Wrap an immediate function invocation in parens " +
-		"to assist the reader in understanding that the expression " +
-		"is the result of a function, and not the function itself."),
-	W063: $._("Math is not a function."),
-	W064: $._("I think you're missing using 'new' to call a constructor."),
-	W065: $._("It looks like you're missing a radix parameter."),
-	W066: $._("Implied eval. Consider passing a function instead of a string."),
-	W067: $._("Bad invocation."),
-	W068: $._("Wrapping non-IIFE function literals in parens is unnecessary."),
-	W069: $._("['{a}'] is better written in dot notation."),
-	W070: $._("Extra comma. (it breaks older versions of IE)"),
-	W071: $._("This function has too many statements. ({a})"),
-	W072: $._("This function has too many parameters. ({a})"),
-	W073: $._("Blocks are nested too deeply. ({a})"),
-	W074: $._("This function's cyclomatic complexity is too high. ({a})"),
-	W075: $._("Duplicate key '{a}'."),
-	W076: $._("Unexpected parameter '{a}' in get {b} function."),
-	W077: $._("Expected a single parameter in set {a} function."),
-	W078: $._("Setter is defined without getter."),
-	W079: $._("Redefinition of '{a}'."),
-	W080: $._("It's not necessary to initialize '{a}' to 'undefined'."),
-	W081: $._("Too many var statements."),
-	W082: $._("Function declarations should not be placed in blocks. " +
-		"Use a function expression or move the statement to the top of " +
-		"the outer function."),
-	W083: $._("It's not a good idea to define functions within a loop. Can you define them outside instead?"),
-	W084: $._("I thought you were going to type a conditional expression but you typed an assignment instead."),
-	W085: $._("Don't use 'with'."),
-	W086: $._("Did you forget a 'break' statement before '{a}'?"),
-	W087: $._("Forgotten 'debugger' statement?"),
-	W088: $._("Creating global 'for' variable. Should be 'for (var {a} ...'."),
-	W089: $._("The body of a for in should be wrapped in an if statement to filter " +
-		"unwanted properties from the prototype."),
-	W090: $._("'{a}' is not a statement label."),
-	W091: $._("'{a}' is out of scope."),
-	W092: $._("Wrap the /regexp/ literal in parens to disambiguate the slash operator."),
-	W093: $._("Did you mean to return a conditional instead of an assignment?"),
-	W094: $._("Unexpected comma."),
-	W095: $._("I thought you were going to type a string but you typed {a}."),
-	W096: $._("The '{a}' key may produce unexpected results."),
-	W097: $._("Use the function form of \"use strict\"."),
-	W098: $._("'{a}' is defined but never used."),
-	W099: $._("Mixed spaces and tabs."),
-	W100: $._("This character may get silently deleted by one or more browsers."),
-	W101: $._("Line is too long."),
-	W102: $._("Trailing whitespace."),
-	W103: $._("The '{a}' property is deprecated."),
-	W104: $._("'{a}' is only available in JavaScript 1.7."),
-	W105: $._("Unexpected {a} in '{b}'."),
-	W106: $._("Identifier '{a}' is not in camel case."),
-	W107: $._("Script URL."),
-	W108: $._("Strings must use doublequote."),
-	W109: $._("Strings must use singlequote."),
-	W110: $._("Mixed double and single quotes."),
-	W112: $._("Unclosed string! Make sure you end your string with a quote."),
-	W113: $._("Control character in string: {a}."),
-	W114: $._("Avoid {a}."),
-	W115: $._("Octal literals are not allowed in strict mode."),
-	W116: $._("I thought you were going to type \"{a}\" but you typed \"{b}\"."),
-	W117: $._("\"{a}\" is not defined. Make sure you're spelling it correctly and that you declared it."),
-	W118: $._("'{a}' is only available in Mozilla JavaScript extensions (use moz option)."),
-	W119: $._("'{a}' is only available in ES6 (use esnext option)."),
-	W120: $._("You might be leaking a variable ({a}) here."),
-	W121: $._("I thought you were going to type a conditional expression but you typed an assignment instead. Maybe you meant to type === instead of =?"),
-	
-};
-
-var info = {
-	I001: $._("Comma warnings can be turned off with 'laxcomma'."),
-	I002: $._("Reserved words as properties can be used under the 'es5' option."),
-	I003: $._("ES5 option is now set per default")
-};
-
-exports.errors = {};
-exports.warnings = {};
-exports.info = {};
-
-for (var code in errors) {
-	exports.errors[code] = { code: code, desc: errors[code] };
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
 }
 
-for (var code in warnings) {
-	exports.warnings[code] = { code: code, desc: warnings[code] };
-}
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
 
-for (var code in info) {
-	exports.info[code] = { code: code, desc: info[code] };
-}
-
-})()
 },{}],2:[function(require,module,exports){
+(function(process){if (!process.EventEmitter) process.EventEmitter = function () {};
+
+var EventEmitter = exports.EventEmitter = process.EventEmitter;
+var isArray = typeof Array.isArray === 'function'
+    ? Array.isArray
+    : function (xs) {
+        return Object.prototype.toString.call(xs) === '[object Array]'
+    }
+;
+function indexOf (xs, x) {
+    if (xs.indexOf) return xs.indexOf(x);
+    for (var i = 0; i < xs.length; i++) {
+        if (x === xs[i]) return i;
+    }
+    return -1;
+}
+
+// By default EventEmitters will print a warning if more than
+// 10 listeners are added to it. This is a useful default which
+// helps finding memory leaks.
+//
+// Obviously not all Emitters should be limited to 10. This function allows
+// that to be increased. Set to zero for unlimited.
+var defaultMaxListeners = 10;
+EventEmitter.prototype.setMaxListeners = function(n) {
+  if (!this._events) this._events = {};
+  this._events.maxListeners = n;
+};
+
+
+EventEmitter.prototype.emit = function(type) {
+  // If there is no 'error' event listener then throw.
+  if (type === 'error') {
+    if (!this._events || !this._events.error ||
+        (isArray(this._events.error) && !this._events.error.length))
+    {
+      if (arguments[1] instanceof Error) {
+        throw arguments[1]; // Unhandled 'error' event
+      } else {
+        throw new Error("Uncaught, unspecified 'error' event.");
+      }
+      return false;
+    }
+  }
+
+  if (!this._events) return false;
+  var handler = this._events[type];
+  if (!handler) return false;
+
+  if (typeof handler == 'function') {
+    switch (arguments.length) {
+      // fast cases
+      case 1:
+        handler.call(this);
+        break;
+      case 2:
+        handler.call(this, arguments[1]);
+        break;
+      case 3:
+        handler.call(this, arguments[1], arguments[2]);
+        break;
+      // slower
+      default:
+        var args = Array.prototype.slice.call(arguments, 1);
+        handler.apply(this, args);
+    }
+    return true;
+
+  } else if (isArray(handler)) {
+    var args = Array.prototype.slice.call(arguments, 1);
+
+    var listeners = handler.slice();
+    for (var i = 0, l = listeners.length; i < l; i++) {
+      listeners[i].apply(this, args);
+    }
+    return true;
+
+  } else {
+    return false;
+  }
+};
+
+// EventEmitter is defined in src/node_events.cc
+// EventEmitter.prototype.emit() is also defined there.
+EventEmitter.prototype.addListener = function(type, listener) {
+  if ('function' !== typeof listener) {
+    throw new Error('addListener only takes instances of Function');
+  }
+
+  if (!this._events) this._events = {};
+
+  // To avoid recursion in the case that type == "newListeners"! Before
+  // adding it to the listeners, first emit "newListeners".
+  this.emit('newListener', type, listener);
+
+  if (!this._events[type]) {
+    // Optimize the case of one listener. Don't need the extra array object.
+    this._events[type] = listener;
+  } else if (isArray(this._events[type])) {
+
+    // Check for listener leak
+    if (!this._events[type].warned) {
+      var m;
+      if (this._events.maxListeners !== undefined) {
+        m = this._events.maxListeners;
+      } else {
+        m = defaultMaxListeners;
+      }
+
+      if (m && m > 0 && this._events[type].length > m) {
+        this._events[type].warned = true;
+        console.error('(node) warning: possible EventEmitter memory ' +
+                      'leak detected. %d listeners added. ' +
+                      'Use emitter.setMaxListeners() to increase limit.',
+                      this._events[type].length);
+        console.trace();
+      }
+    }
+
+    // If we've already got an array, just append.
+    this._events[type].push(listener);
+  } else {
+    // Adding the second element, need to change to array.
+    this._events[type] = [this._events[type], listener];
+  }
+
+  return this;
+};
+
+EventEmitter.prototype.on = EventEmitter.prototype.addListener;
+
+EventEmitter.prototype.once = function(type, listener) {
+  var self = this;
+  self.on(type, function g() {
+    self.removeListener(type, g);
+    listener.apply(this, arguments);
+  });
+
+  return this;
+};
+
+EventEmitter.prototype.removeListener = function(type, listener) {
+  if ('function' !== typeof listener) {
+    throw new Error('removeListener only takes instances of Function');
+  }
+
+  // does not use listeners(), so no side effect of creating _events[type]
+  if (!this._events || !this._events[type]) return this;
+
+  var list = this._events[type];
+
+  if (isArray(list)) {
+    var i = indexOf(list, listener);
+    if (i < 0) return this;
+    list.splice(i, 1);
+    if (list.length == 0)
+      delete this._events[type];
+  } else if (this._events[type] === listener) {
+    delete this._events[type];
+  }
+
+  return this;
+};
+
+EventEmitter.prototype.removeAllListeners = function(type) {
+  if (arguments.length === 0) {
+    this._events = {};
+    return this;
+  }
+
+  // does not use listeners(), so no side effect of creating _events[type]
+  if (type && this._events && this._events[type]) this._events[type] = null;
+  return this;
+};
+
+EventEmitter.prototype.listeners = function(type) {
+  if (!this._events) this._events = {};
+  if (!this._events[type]) this._events[type] = [];
+  if (!isArray(this._events[type])) {
+    this._events[type] = [this._events[type]];
+  }
+  return this._events[type];
+};
+
+})(require("__browserify_process"))
+},{"__browserify_process":1}],3:[function(require,module,exports){
 (function(){// jshint -W001
 
 "use strict";
@@ -821,7 +835,233 @@ exports.yui = {
 
 
 })()
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
+(function(){"use strict";
+
+// XXX(jeresig): Used for i18n string extraction
+var $ = { _: function (msg) { return msg; } };
+
+var errors = {
+	// JSHint options
+	E001: $._("Bad option: '{a}'."),
+	E002: $._("Bad option value."),
+
+	// JSHint input
+	E003: $._("Expected a JSON value."),
+	E004: $._("Input is neither a string nor an array of strings."),
+	E005: $._("Input is empty."),
+	E006: $._("Unexpected early end of program."),
+
+	// Strict mode
+	E007: $._("Missing \"use strict\" statement."),
+	E008: $._("Strict violation."),
+	E009: $._("Option 'validthis' can't be used in a global scope."),
+	E010: $._("'with' is not allowed in strict mode."),
+
+	// Constants
+	E011: $._("const '{a}' has already been declared."),
+	E012: $._("const '{a}' is initialized to 'undefined'."),
+	E013: $._("Attempting to override '{a}' which is a constant."),
+
+	// Regular expressions
+	E014: $._("A regular expression literal can be confused with '/='."),
+	E015: $._("Unclosed regular expression."),
+	E016: $._("Invalid regular expression."),
+
+	// Tokens
+	E017: $._("It looks like your comment isn't closed. Use \"*/\" to end a multi-line comment."),
+	E018: $._("It looks like you never started your comment. Use \"/*\" to start a multi-line comment."),
+	E019: $._("Unmatched \"{a}\"."),
+	E020: $._("I thought you were going to type \"{a}\" to match \"{b}\" from line {c} but you typed \"{d}\""),
+	E021: $._("I thought you were going to type \"{a}\" but you typed \"{b}\"!"),
+	E022: $._("Line breaking error '{a}'."),
+	E023: $._("I think you're missing a \"{a}\"!"),
+	E024: $._("Unexpected \"{a}\"."),
+	E025: $._("I think you're missing ':' on a case clause."),
+	E026: $._("I think you're missing a '}' to match '{' from line {a}."),
+	E027: $._("I think you're missing a ']' to match '[' from line {a}."),
+	E028: $._("Illegal comma."),
+	E029: $._("Unclosed string! Make sure you end your string with a quote."),
+
+	// Everything else
+	E030: $._("I thought you were going to type an identifier but you typed '{a}'."),
+	E031: $._("The left side of an assignment must be a single variable name, not an expression."), // FIXME: Rephrase
+	E032: $._("I thought you were going to type a number or 'false' but you typed '{a}'."),
+	E033: $._("I thought you were going to type an operator but you typed '{a}'."),
+	E034: $._("get/set are ES5 features."),
+	E035: $._("I think you're missing a property name."),
+	E036: $._("I thought you were going to type a statement but you typed a block instead."),
+	E037: null, // Vacant
+	E038: null, // Vacant
+	E039: $._("Function declarations are not invocable. Wrap the whole function invocation in parens."),
+	E040: $._("Each value should have its own case label."),
+	E041: $._("Unrecoverable syntax error."),
+	E042: $._("Stopping."),
+	E043: $._("Too many errors."),
+	E044: $._("'{a}' is already defined and can't be redefined."),
+	E045: $._("Invalid for each loop."),
+	E046: $._("A yield statement shall be within a generator function (with syntax: `function*`)"),
+	E047: $._("A generator function shall contain a yield statement."),
+	E048: $._("Let declaration not directly within block."),
+	E049: $._("A {a} cannot be named '{b}'."),
+	E050: $._("Mozilla requires the yield expression to be parenthesized here."),
+	E051: $._("Regular parameters cannot come after default parameters."),
+	E052: $._("I think you meant to type a value or variable name before that comma?"),
+	E053: $._("I think you either have an extra comma or a missing argument?")
+};
+
+var warnings = {
+	W001: $._("'hasOwnProperty' is a really bad name."),
+	W002: $._("Value of '{a}' may be overwritten in IE 8 and earlier."),
+	W003: $._("'{a}' was used before it was defined."),
+	W004: $._("'{a}' is already defined."),
+	W005: $._("A dot following a number can be confused with a decimal point."),
+	W006: $._("Confusing minuses."),
+	W007: $._("Confusing pluses."),
+	W008: $._("Please put a 0 in front of the decimal point: \"{a}\"!"),
+	W009: $._("The array literal notation [] is preferrable."),
+	W010: $._("The object literal notation {} is preferrable."),
+	W011: $._("Unexpected space after '{a}'."),
+	W012: $._("Unexpected space before '{a}'."),
+	W013: $._("I think you're missing a space after \"{a}\"."),
+	W014: $._("Bad line breaking before '{a}'."),
+	W015: $._("Expected '{a}' to have an indentation at {b} instead at {c}."),
+	W016: $._("Unexpected use of '{a}'."),
+	W017: $._("Bad operand."),
+	W018: $._("Confusing use of '{a}'."),
+	W019: $._("Use the isNaN function to compare with NaN."),
+	W020: $._("Read only."),
+	W021: $._("'{a}' is a function."),
+	W022: $._("Do not assign to the exception parameter."),
+	W023: $._("I thought you were going to type an identifier in an assignment but you typed a function invocation instead."),
+	W024: $._("I thought you were going to type an identifier but you typed '{a}' (a reserved word)."),
+	W025: $._("I think you're missing the name in your function declaration."),
+	W026: $._("Inner functions should be listed at the top of the outer function."),
+	W027: $._("Unreachable '{a}' after '{b}'."),
+	W028: $._("Label '{a}' on {b} statement."),
+	W030: $._("I thought you were going to type an assignment or function call but you typed an expression instead."),
+	W031: $._("Do not use 'new' for side effects."),
+	W032: $._("It looks like you have an unnecessary semicolon."),
+	W033: $._("It looks like you're missing a semicolon."),
+	W034: $._("Unnecessary directive \"{a}\"."),
+	W035: $._("Empty block."),
+	W036: $._("Unexpected /*member '{a}'."),
+	W037: $._("'{a}' is a statement label."),
+	W038: $._("'{a}' used out of scope."),
+	W039: $._("'{a}' is not allowed."),
+	W040: $._("Possible strict violation."),
+	W041: $._("Use '{a}' to compare with '{b}'."),
+	W042: $._("Avoid EOL escaping."),
+	W043: $._("Bad escaping of EOL. Use option multistr if needed."),
+	W044: $._("Bad or unnecessary escaping."),
+	W045: $._("Bad number '{a}'."),
+	W046: $._("Don't use extra leading zeros \"{a}\"."),
+	W047: $._("A trailing decimal point can be confused with a dot: '{a}'."),
+	W048: $._("Unexpected control character in regular expression."),
+	W049: $._("Unexpected escaped character '{a}' in regular expression."),
+	W050: $._("JavaScript URL."),
+	W051: $._("Variables should not be deleted."),
+	W052: $._("Unexpected '{a}'."),
+	W053: $._("Do not use {a} as a constructor."),
+	W054: $._("The Function constructor is a form of eval."),
+	W055: $._("A constructor name should start with an uppercase letter."),
+	W056: $._("Bad constructor."),
+	W057: $._("Weird construction. Is 'new' necessary?"),
+	W058: $._("I think you're missing the \"()\" to invoke the constructor."),
+	W059: $._("Avoid arguments.{a}."),
+	W060: $._("document.write can be a form of eval."),
+	W061: $._("eval can be harmful."),
+	W062: $._("Wrap an immediate function invocation in parens " +
+		"to assist the reader in understanding that the expression " +
+		"is the result of a function, and not the function itself."),
+	W063: $._("Math is not a function."),
+	W064: $._("I think you're missing using 'new' to call a constructor."),
+	W065: $._("It looks like you're missing a radix parameter."),
+	W066: $._("Implied eval. Consider passing a function instead of a string."),
+	W067: $._("Bad invocation."),
+	W068: $._("Wrapping non-IIFE function literals in parens is unnecessary."),
+	W069: $._("['{a}'] is better written in dot notation."),
+	W070: $._("Extra comma. (it breaks older versions of IE)"),
+	W071: $._("This function has too many statements. ({a})"),
+	W072: $._("This function has too many parameters. ({a})"),
+	W073: $._("Blocks are nested too deeply. ({a})"),
+	W074: $._("This function's cyclomatic complexity is too high. ({a})"),
+	W075: $._("Duplicate key '{a}'."),
+	W076: $._("Unexpected parameter '{a}' in get {b} function."),
+	W077: $._("Expected a single parameter in set {a} function."),
+	W078: $._("Setter is defined without getter."),
+	W079: $._("Redefinition of '{a}'."),
+	W080: $._("It's not necessary to initialize '{a}' to 'undefined'."),
+	W081: $._("Too many var statements."),
+	W082: $._("Function declarations should not be placed in blocks. " +
+		"Use a function expression or move the statement to the top of " +
+		"the outer function."),
+	W083: $._("It's not a good idea to define functions within a loop. Can you define them outside instead?"),
+	W084: $._("I thought you were going to type a conditional expression but you typed an assignment instead."),
+	W085: $._("Don't use 'with'."),
+	W086: $._("Did you forget a 'break' statement before '{a}'?"),
+	W087: $._("Forgotten 'debugger' statement?"),
+	W088: $._("Creating global 'for' variable. Should be 'for (var {a} ...'."),
+	W089: $._("The body of a for in should be wrapped in an if statement to filter " +
+		"unwanted properties from the prototype."),
+	W090: $._("'{a}' is not a statement label."),
+	W091: $._("'{a}' is out of scope."),
+	W092: $._("Wrap the /regexp/ literal in parens to disambiguate the slash operator."),
+	W093: $._("Did you mean to return a conditional instead of an assignment?"),
+	W094: $._("Unexpected comma."),
+	W095: $._("I thought you were going to type a string but you typed {a}."),
+	W096: $._("The '{a}' key may produce unexpected results."),
+	W097: $._("Use the function form of \"use strict\"."),
+	W098: $._("'{a}' is defined but never used."),
+	W099: $._("Mixed spaces and tabs."),
+	W100: $._("This character may get silently deleted by one or more browsers."),
+	W101: $._("Line is too long."),
+	W102: $._("Trailing whitespace."),
+	W103: $._("The '{a}' property is deprecated."),
+	W104: $._("'{a}' is only available in JavaScript 1.7."),
+	W105: $._("Unexpected {a} in '{b}'."),
+	W106: $._("Identifier '{a}' is not in camel case."),
+	W107: $._("Script URL."),
+	W108: $._("Strings must use doublequote."),
+	W109: $._("Strings must use singlequote."),
+	W110: $._("Mixed double and single quotes."),
+	W112: $._("Unclosed string! Make sure you end your string with a quote."),
+	W113: $._("Control character in string: {a}."),
+	W114: $._("Avoid {a}."),
+	W115: $._("Octal literals are not allowed in strict mode."),
+	W116: $._("I thought you were going to type \"{a}\" but you typed \"{b}\"."),
+	W117: $._("\"{a}\" is not defined. Make sure you're spelling it correctly and that you declared it."),
+	W118: $._("'{a}' is only available in Mozilla JavaScript extensions (use moz option)."),
+	W119: $._("'{a}' is only available in ES6 (use esnext option)."),
+	W120: $._("You might be leaking a variable ({a}) here."),
+	W121: $._("I thought you were going to type a conditional expression but you typed an assignment instead. Maybe you meant to type === instead of =?"),
+	
+};
+
+var info = {
+	I001: $._("Comma warnings can be turned off with 'laxcomma'."),
+	I002: $._("Reserved words as properties can be used under the 'es5' option."),
+	I003: $._("ES5 option is now set per default")
+};
+
+exports.errors = {};
+exports.warnings = {};
+exports.info = {};
+
+for (var code in errors) {
+	exports.errors[code] = { code: code, desc: errors[code] };
+}
+
+for (var code in warnings) {
+	exports.warnings[code] = { code: code, desc: warnings[code] };
+}
+
+for (var code in info) {
+	exports.info[code] = { code: code, desc: info[code] };
+}
+
+})()
+},{}],5:[function(require,module,exports){
 /*
  * Regular expressions. Some of these are stupidly long.
  */
@@ -857,7 +1097,7 @@ exports.javascriptURL = /^(?:javascript|jscript|ecmascript|vbscript|mocha|livesc
 // Catches /* falls through */ comments (ft)
 exports.fallsThrough = /^\s*\/\*\s*falls?\sthrough\s*\*\/\s*$/;
 
-},{}],4:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 
 var state = {
@@ -883,7 +1123,7 @@ var state = {
 
 exports.state = state;
 
-},{}],5:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 (function(){"use strict";
 
 exports.register = function (linter) {
@@ -1056,247 +1296,7 @@ exports.register = function (linter) {
 	});
 };
 })()
-},{}],6:[function(require,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-
-process.nextTick = (function () {
-    var canSetImmediate = typeof window !== 'undefined'
-    && window.setImmediate;
-    var canPost = typeof window !== 'undefined'
-    && window.postMessage && window.addEventListener
-    ;
-
-    if (canSetImmediate) {
-        return function (f) { return window.setImmediate(f) };
-    }
-
-    if (canPost) {
-        var queue = [];
-        window.addEventListener('message', function (ev) {
-            if (ev.source === window && ev.data === 'process-tick') {
-                ev.stopPropagation();
-                if (queue.length > 0) {
-                    var fn = queue.shift();
-                    fn();
-                }
-            }
-        }, true);
-
-        return function nextTick(fn) {
-            queue.push(fn);
-            window.postMessage('process-tick', '*');
-        };
-    }
-
-    return function nextTick(fn) {
-        setTimeout(fn, 0);
-    };
-})();
-
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-}
-
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-
-},{}],7:[function(require,module,exports){
-(function(process){if (!process.EventEmitter) process.EventEmitter = function () {};
-
-var EventEmitter = exports.EventEmitter = process.EventEmitter;
-var isArray = typeof Array.isArray === 'function'
-    ? Array.isArray
-    : function (xs) {
-        return Object.prototype.toString.call(xs) === '[object Array]'
-    }
-;
-function indexOf (xs, x) {
-    if (xs.indexOf) return xs.indexOf(x);
-    for (var i = 0; i < xs.length; i++) {
-        if (x === xs[i]) return i;
-    }
-    return -1;
-}
-
-// By default EventEmitters will print a warning if more than
-// 10 listeners are added to it. This is a useful default which
-// helps finding memory leaks.
-//
-// Obviously not all Emitters should be limited to 10. This function allows
-// that to be increased. Set to zero for unlimited.
-var defaultMaxListeners = 10;
-EventEmitter.prototype.setMaxListeners = function(n) {
-  if (!this._events) this._events = {};
-  this._events.maxListeners = n;
-};
-
-
-EventEmitter.prototype.emit = function(type) {
-  // If there is no 'error' event listener then throw.
-  if (type === 'error') {
-    if (!this._events || !this._events.error ||
-        (isArray(this._events.error) && !this._events.error.length))
-    {
-      if (arguments[1] instanceof Error) {
-        throw arguments[1]; // Unhandled 'error' event
-      } else {
-        throw new Error("Uncaught, unspecified 'error' event.");
-      }
-      return false;
-    }
-  }
-
-  if (!this._events) return false;
-  var handler = this._events[type];
-  if (!handler) return false;
-
-  if (typeof handler == 'function') {
-    switch (arguments.length) {
-      // fast cases
-      case 1:
-        handler.call(this);
-        break;
-      case 2:
-        handler.call(this, arguments[1]);
-        break;
-      case 3:
-        handler.call(this, arguments[1], arguments[2]);
-        break;
-      // slower
-      default:
-        var args = Array.prototype.slice.call(arguments, 1);
-        handler.apply(this, args);
-    }
-    return true;
-
-  } else if (isArray(handler)) {
-    var args = Array.prototype.slice.call(arguments, 1);
-
-    var listeners = handler.slice();
-    for (var i = 0, l = listeners.length; i < l; i++) {
-      listeners[i].apply(this, args);
-    }
-    return true;
-
-  } else {
-    return false;
-  }
-};
-
-// EventEmitter is defined in src/node_events.cc
-// EventEmitter.prototype.emit() is also defined there.
-EventEmitter.prototype.addListener = function(type, listener) {
-  if ('function' !== typeof listener) {
-    throw new Error('addListener only takes instances of Function');
-  }
-
-  if (!this._events) this._events = {};
-
-  // To avoid recursion in the case that type == "newListeners"! Before
-  // adding it to the listeners, first emit "newListeners".
-  this.emit('newListener', type, listener);
-
-  if (!this._events[type]) {
-    // Optimize the case of one listener. Don't need the extra array object.
-    this._events[type] = listener;
-  } else if (isArray(this._events[type])) {
-
-    // Check for listener leak
-    if (!this._events[type].warned) {
-      var m;
-      if (this._events.maxListeners !== undefined) {
-        m = this._events.maxListeners;
-      } else {
-        m = defaultMaxListeners;
-      }
-
-      if (m && m > 0 && this._events[type].length > m) {
-        this._events[type].warned = true;
-        console.error('(node) warning: possible EventEmitter memory ' +
-                      'leak detected. %d listeners added. ' +
-                      'Use emitter.setMaxListeners() to increase limit.',
-                      this._events[type].length);
-        console.trace();
-      }
-    }
-
-    // If we've already got an array, just append.
-    this._events[type].push(listener);
-  } else {
-    // Adding the second element, need to change to array.
-    this._events[type] = [this._events[type], listener];
-  }
-
-  return this;
-};
-
-EventEmitter.prototype.on = EventEmitter.prototype.addListener;
-
-EventEmitter.prototype.once = function(type, listener) {
-  var self = this;
-  self.on(type, function g() {
-    self.removeListener(type, g);
-    listener.apply(this, arguments);
-  });
-
-  return this;
-};
-
-EventEmitter.prototype.removeListener = function(type, listener) {
-  if ('function' !== typeof listener) {
-    throw new Error('removeListener only takes instances of Function');
-  }
-
-  // does not use listeners(), so no side effect of creating _events[type]
-  if (!this._events || !this._events[type]) return this;
-
-  var list = this._events[type];
-
-  if (isArray(list)) {
-    var i = indexOf(list, listener);
-    if (i < 0) return this;
-    list.splice(i, 1);
-    if (list.length == 0)
-      delete this._events[type];
-  } else if (this._events[type] === listener) {
-    delete this._events[type];
-  }
-
-  return this;
-};
-
-EventEmitter.prototype.removeAllListeners = function(type) {
-  if (arguments.length === 0) {
-    this._events = {};
-    return this;
-  }
-
-  // does not use listeners(), so no side effect of creating _events[type]
-  if (type && this._events && this._events[type]) this._events[type] = null;
-  return this;
-};
-
-EventEmitter.prototype.listeners = function(type) {
-  if (!this._events) this._events = {};
-  if (!this._events[type]) this._events[type] = [];
-  if (!isArray(this._events[type])) {
-    this._events[type] = [this._events[type]];
-  }
-  return this._events[type];
-};
-
-})(require("__browserify_process"))
-},{"__browserify_process":6}],8:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 (function(){/*
  * Lexical analysis and token construction.
  */
@@ -2992,7 +2992,7 @@ Lexer.prototype = {
 exports.Lexer = Lexer;
 
 })()
-},{"events":7,"./reg.js":3,"./state.js":4}],"jshint":[function(require,module,exports){
+},{"events":2,"./reg.js":5,"./state.js":6}],"jshint":[function(require,module,exports){
 module.exports=require('FD4Lxs');
 },{}],"FD4Lxs":[function(require,module,exports){
 (function(){/*!
@@ -3233,18 +3233,19 @@ var JSHINT = (function () {
 		extraModules = [],
 		emitter = new events.EventEmitter(),
         
-		hasOwnProperty = Object.prototype.hasOwnProperty;
+		hasOwnProperty = Object.prototype.hasOwnProperty,
+		_ = {};
 
-	function _has(obj, key) {
+	_.has = function(obj, key) {
 		return hasOwnProperty.call(obj, key);
-	}
+	};
 
-	function _contains(obj, target) {
+	_.contains = function(obj, target) {
 		if (obj === null || obj === undefined) {
 			return false;
 		}
 		return obj.indexOf(target) !== -1;
-	}
+	};
 
 	function checkOption(name, t) {
 		name = name.trim();
@@ -3315,7 +3316,7 @@ var JSHINT = (function () {
 	function combine(t, o) {
 		var n;
 		for (n in o) {
-			if (_has(o, n) && !_has(JSHINT.blacklist, n)) {
+			if (_.has(o, n) && !_.has(JSHINT.blacklist, n)) {
 				t[n] = o[n];
 			}
 		}
@@ -3532,18 +3533,18 @@ var JSHINT = (function () {
 	function addlabel(t, type, tkn, islet) {
 		// Define t in the current function in the current scope.
 		if (type === "exception") {
-			if (_has(funct["(context)"], t)) {
+			if (_.has(funct["(context)"], t)) {
 				if (funct[t] !== true && !state.option.node) {
 					warning("W002", state.tokens.next, t);
 				}
 			}
 		}
 
-		if (_has(funct, t) && !funct["(global)"]) {
+		if (_.has(funct, t) && !funct["(global)"]) {
 			if (funct[t] === true) {
 				if (state.option.latedef) {
-					if ((state.option.latedef === true && _contains([funct[t], type], "unction")) ||
-							!_contains([funct[t], type], "unction")) {
+					if ((state.option.latedef === true && _.contains([funct[t], type], "unction")) ||
+							!_.contains([funct[t], type], "unction")) {
 						warning("W003", state.tokens.next, t);
 					}
 				}
@@ -3573,10 +3574,10 @@ var JSHINT = (function () {
 
 			if (funct["(global)"]) {
 				global[t] = funct;
-				if (_has(implied, t)) {
+				if (_.has(implied, t)) {
 					if (state.option.latedef) {
-						if ((state.option.latedef === true && _contains([funct[t], type], "unction")) ||
-								!_contains([funct[t], type], "unction")) {
+						if ((state.option.latedef === true && _.contains([funct[t], type], "unction")) ||
+								!_.contains([funct[t], type], "unction")) {
 							warning("W003", state.tokens.next, t);
 						}
 					}
@@ -3614,7 +3615,7 @@ var JSHINT = (function () {
 			combine(predefined, predef);
 
 			for (var key in predef) {
-				if (_has(predef, key)) {
+				if (_.has(predef, key)) {
 					declared[key] = nt;
 				}
 			}
@@ -4568,7 +4569,7 @@ var JSHINT = (function () {
 		}
 
 		// detect a destructuring assignment
-		if (_has(["[", "{"], t.value)) {
+		if (_.has(["[", "{"], t.value)) {
 			if (lookupBlockType().isDestAssign) {
 				if (!state.option.inESNext()) {
 					warning("W104", state.tokens.curr, "destructuring expression");
@@ -4771,7 +4772,7 @@ var JSHINT = (function () {
 				if (isfunc) {
 					m = {};
 					for (d in state.directive) {
-						if (_has(state.directive, d)) {
+						if (_.has(state.directive, d)) {
 							m[d] = state.directive[d];
 						}
 					}
@@ -4813,7 +4814,7 @@ var JSHINT = (function () {
 
 				if (!stmt) {
 					for (d in state.directive) {
-						if (_has(state.directive, d)) {
+						if (_.has(state.directive, d)) {
 							m[d] = state.directive[d];
 						}
 					}
@@ -4914,7 +4915,7 @@ var JSHINT = (function () {
 				funct = f;
 			}
 			var block;
-			if (_has(funct, "(blockscope)")) {
+			if (_.has(funct, "(blockscope)")) {
 				block = funct["(blockscope)"].getlabel(v);
 			}
 
@@ -5285,7 +5286,7 @@ var JSHINT = (function () {
 				default:
 					if (c.id !== "function") {
 						i = c.value.substr(0, 1);
-						if (state.option.newcap && (i < "A" || i > "Z") && !_has(global, c.value)) {
+						if (state.option.newcap && (i < "A" || i > "Z") && !_.has(global, c.value)) {
 							warning("W055", state.tokens.curr);
 						}
 					}
@@ -5545,7 +5546,7 @@ var JSHINT = (function () {
 		advance("(");
 		funct["(comparray)"].setState("define");
 		res.left = expression(130);
-		if (_contains(["in", "of"], state.tokens.next.value)) {
+		if (_.contains(["in", "of"], state.tokens.next.value)) {
 			advance();
 		} else {
 			error("E045", state.tokens.curr);
@@ -5655,7 +5656,7 @@ var JSHINT = (function () {
 			if (parsed instanceof Array) {
 				for (var i in parsed) {
 					curr = parsed[i];
-					if (_contains(["{", "["], curr.id)) {
+					if (_.contains(["{", "["], curr.id)) {
 						for (t in curr.left) {
 							t = tokens[t];
 							if (t.id) {
@@ -5692,7 +5693,7 @@ var JSHINT = (function () {
 		}
 
 		for (;;) {
-			if (_contains(["{", "["], state.tokens.next.id)) {
+			if (_.contains(["{", "["], state.tokens.next.id)) {
 				tokens = destructuringExpression();
 				for (t in tokens) {
 					t = tokens[t];
@@ -5886,7 +5887,7 @@ var JSHINT = (function () {
 			var tag = "";
 
 			function saveProperty(name, tkn) {
-				if (props[name] && _has(props, name))
+				if (props[name] && _.has(props, name))
 					warning("W075", state.tokens.next, i);
 				else
 					props[name] = {};
@@ -5896,7 +5897,7 @@ var JSHINT = (function () {
 			}
 
 			function saveSetter(name, tkn) {
-				if (props[name] && _has(props, name)) {
+				if (props[name] && _.has(props, name)) {
 					if (props[name].basic || props[name].setter)
 						warning("W075", state.tokens.next, i);
 				} else {
@@ -5908,7 +5909,7 @@ var JSHINT = (function () {
 			}
 
 			function saveGetter(name) {
-				if (props[name] && _has(props, name)) {
+				if (props[name] && _.has(props, name)) {
 					if (props[name].basic || props[name].getter)
 						warning("W075", state.tokens.next, i);
 				} else {
@@ -6054,7 +6055,7 @@ var JSHINT = (function () {
 			// Check for lonely setters if in the ES5 mode.
 			if (state.option.inES5()) {
 				for (var name in props) {
-					if (_has(props, name) && props[name].setter && !props[name].getter) {
+					if (_.has(props, name) && props[name].setter && !props[name].getter) {
 						warning("W078", props[name].setterToken);
 					}
 				}
@@ -6074,7 +6075,7 @@ var JSHINT = (function () {
 		}
 		var nextInnerDE = function () {
 			var ident;
-			if (_contains(["[", "{"], state.tokens.next.value)) {
+			if (_.contains(["[", "{"], state.tokens.next.value)) {
 				ids = destructuringExpression();
 				for (var id in ids) {
 					id = ids[id];
@@ -6148,7 +6149,7 @@ var JSHINT = (function () {
 		for (;;) {
 			var names = [];
 			nonadjacent(state.tokens.curr, state.tokens.next);
-			if (_contains(["{", "["], state.tokens.next.value)) {
+			if (_.contains(["{", "["], state.tokens.next.value)) {
 				tokens = destructuringExpression();
 				lone = false;
 			} else {
@@ -6219,7 +6220,7 @@ var JSHINT = (function () {
 		for (;;) {
 			var names = [];
 			nonadjacent(state.tokens.curr, state.tokens.next);
-			if (_contains(["{", "["], state.tokens.next.value)) {
+			if (_.contains(["{", "["], state.tokens.next.value)) {
 				tokens = destructuringExpression();
 				lone = false;
 			} else {
@@ -6299,7 +6300,7 @@ var JSHINT = (function () {
 		for (;;) {
 			var names = [];
 			nonadjacent(state.tokens.curr, state.tokens.next);
-			if (_contains(["{", "["], state.tokens.next.value)) {
+			if (_.contains(["{", "["], state.tokens.next.value)) {
 				tokens = destructuringExpression();
 				lone = false;
 			} else {
@@ -6756,11 +6757,11 @@ var JSHINT = (function () {
 		do {
 			nextop = peek(i);
 			++i;
-		} while (!_contains(inof, nextop.value) && nextop.value !== ";" &&
+		} while (!_.contains(inof, nextop.value) && nextop.value !== ";" &&
 					nextop.type !== "(end)");
 
 		// if we're in a for (… in|of …) statement
-		if (_contains(inof, nextop.value)) {
+		if (_.contains(inof, nextop.value)) {
 			if (!state.option.inESNext() && nextop.value === "of") {
 				error("W104", nextop, "for of");
 			}
@@ -7111,15 +7112,15 @@ var JSHINT = (function () {
 		var i = -1;
 		var bracketStack = 0;
 		var ret = {};
-		if (_contains(["[", "{"], state.tokens.curr.value))
+		if (_.contains(["[", "{"], state.tokens.curr.value))
 			bracketStack += 1;
 		do {
 			pn = (i === -1) ? state.tokens.next : peek(i);
 			pn1 = peek(i + 1);
 			i = i + 1;
-			if (_contains(["[", "{"], pn.value)) {
+			if (_.contains(["[", "{"], pn.value)) {
 				bracketStack += 1;
-			} else if (_contains(["]", "}"], pn.value)) {
+			} else if (_.contains(["]", "}"], pn.value)) {
 				bracketStack -= 1;
 			}
 			if (pn.identifier && pn.value === "for" && bracketStack === 1) {
@@ -7127,7 +7128,7 @@ var JSHINT = (function () {
 				ret.notJson = true;
 				break;
 			}
-			if (_contains(["}", "]"], pn.value) && pn1.value === "=" && bracketStack === 0) {
+			if (_.contains(["}", "]"], pn.value) && pn1.value === "=" && bracketStack === 0) {
 				ret.isDestAssign = true;
 				ret.notJson = true;
 				break;
@@ -7213,7 +7214,7 @@ var JSHINT = (function () {
 					_current = _carrays[_carrays.length - 1];
 				},
 				setState: function (s) {
-					if (_contains(["use", "define", "generate", "filter"], s))
+					if (_.contains(["use", "define", "generate", "filter"], s))
 						_current.mode = s;
 				},
 				check: function (v) {
@@ -7385,7 +7386,7 @@ var JSHINT = (function () {
 
 			getlabel: function (l) {
 				for (var i = _variables.length - 1 ; i >= 0; --i) {
-					if (_has(_variables[i], l)) {
+					if (_.has(_variables[i], l)) {
 						return _variables[i];
 					}
 				}
@@ -7393,7 +7394,7 @@ var JSHINT = (function () {
 
 			current: {
 				has: function (t) {
-					return _has(_current, t);
+					return _.has(_current, t);
 				},
 				add: function (t, type, tok) {
 					_current[t] = { "(type)" : type,
@@ -7578,7 +7579,7 @@ var JSHINT = (function () {
 
 		// Check options
 		for (var name in o) {
-			if (_has(o, name)) {
+			if (_.has(o, name)) {
 				checkOption(name, state.tokens.curr);
 			}
 		}
@@ -7697,7 +7698,7 @@ var JSHINT = (function () {
 					return;
 
 				// Variable is in global scope and defined as exported.
-				if (func["(global)"] && _has(exported, key)) {
+				if (func["(global)"] && _.has(exported, key)) {
 					return;
 				}
 
@@ -7721,7 +7722,7 @@ var JSHINT = (function () {
 				}
 
 				for (var key in func) {
-					if (_has(func, key)) {
+					if (_.has(func, key)) {
 						checkUnused(func, key);
 					}
 				}
@@ -7755,7 +7756,7 @@ var JSHINT = (function () {
 			});
 
 			for (var key in declared) {
-				if (_has(declared, key) && !_has(global, key)) {
+				if (_.has(declared, key) && !_.has(global, key)) {
 					warnUnused(key, declared[key], "var");
 				}
 			}
@@ -7818,7 +7819,7 @@ var JSHINT = (function () {
 		}
 
 		for (n in implied) {
-			if (_has(implied, n)) {
+			if (_.has(implied, n)) {
 				implieds.push({
 					name: n,
 					line: implied[n]
@@ -7895,7 +7896,7 @@ if (typeof exports === "object" && exports) {
 }
 
 })()
-},{"events":7,"./vars.js":2,"./messages.js":1,"./lex.js":8,"./reg.js":3,"./state.js":4,"./style.js":5,"console-browserify":9}],9:[function(require,module,exports){
+},{"events":2,"./vars.js":3,"./messages.js":4,"./lex.js":8,"./reg.js":5,"./state.js":6,"./style.js":7,"console-browserify":9}],9:[function(require,module,exports){
 (function(global){/*global window, global*/
 var util = require("util")
 var assert = require("assert")
@@ -7983,324 +7984,7 @@ function assert(expression) {
 }
 
 })(window)
-},{"util":10,"assert":11}],11:[function(require,module,exports){
-(function(){// UTILITY
-var util = require('util');
-var Buffer = require("buffer").Buffer;
-var pSlice = Array.prototype.slice;
-
-function objectKeys(object) {
-  if (Object.keys) return Object.keys(object);
-  var result = [];
-  for (var name in object) {
-    if (Object.prototype.hasOwnProperty.call(object, name)) {
-      result.push(name);
-    }
-  }
-  return result;
-}
-
-// 1. The assert module provides functions that throw
-// AssertionError's when particular conditions are not met. The
-// assert module must conform to the following interface.
-
-var assert = module.exports = ok;
-
-// 2. The AssertionError is defined in assert.
-// new assert.AssertionError({ message: message,
-//                             actual: actual,
-//                             expected: expected })
-
-assert.AssertionError = function AssertionError(options) {
-  this.name = 'AssertionError';
-  this.message = options.message;
-  this.actual = options.actual;
-  this.expected = options.expected;
-  this.operator = options.operator;
-  var stackStartFunction = options.stackStartFunction || fail;
-
-  if (Error.captureStackTrace) {
-    Error.captureStackTrace(this, stackStartFunction);
-  }
-};
-util.inherits(assert.AssertionError, Error);
-
-function replacer(key, value) {
-  if (value === undefined) {
-    return '' + value;
-  }
-  if (typeof value === 'number' && (isNaN(value) || !isFinite(value))) {
-    return value.toString();
-  }
-  if (typeof value === 'function' || value instanceof RegExp) {
-    return value.toString();
-  }
-  return value;
-}
-
-function truncate(s, n) {
-  if (typeof s == 'string') {
-    return s.length < n ? s : s.slice(0, n);
-  } else {
-    return s;
-  }
-}
-
-assert.AssertionError.prototype.toString = function() {
-  if (this.message) {
-    return [this.name + ':', this.message].join(' ');
-  } else {
-    return [
-      this.name + ':',
-      truncate(JSON.stringify(this.actual, replacer), 128),
-      this.operator,
-      truncate(JSON.stringify(this.expected, replacer), 128)
-    ].join(' ');
-  }
-};
-
-// assert.AssertionError instanceof Error
-
-assert.AssertionError.__proto__ = Error.prototype;
-
-// At present only the three keys mentioned above are used and
-// understood by the spec. Implementations or sub modules can pass
-// other keys to the AssertionError's constructor - they will be
-// ignored.
-
-// 3. All of the following functions must throw an AssertionError
-// when a corresponding condition is not met, with a message that
-// may be undefined if not provided.  All assertion methods provide
-// both the actual and expected values to the assertion error for
-// display purposes.
-
-function fail(actual, expected, message, operator, stackStartFunction) {
-  throw new assert.AssertionError({
-    message: message,
-    actual: actual,
-    expected: expected,
-    operator: operator,
-    stackStartFunction: stackStartFunction
-  });
-}
-
-// EXTENSION! allows for well behaved errors defined elsewhere.
-assert.fail = fail;
-
-// 4. Pure assertion tests whether a value is truthy, as determined
-// by !!guard.
-// assert.ok(guard, message_opt);
-// This statement is equivalent to assert.equal(true, guard,
-// message_opt);. To test strictly for the value true, use
-// assert.strictEqual(true, guard, message_opt);.
-
-function ok(value, message) {
-  if (!!!value) fail(value, true, message, '==', assert.ok);
-}
-assert.ok = ok;
-
-// 5. The equality assertion tests shallow, coercive equality with
-// ==.
-// assert.equal(actual, expected, message_opt);
-
-assert.equal = function equal(actual, expected, message) {
-  if (actual != expected) fail(actual, expected, message, '==', assert.equal);
-};
-
-// 6. The non-equality assertion tests for whether two objects are not equal
-// with != assert.notEqual(actual, expected, message_opt);
-
-assert.notEqual = function notEqual(actual, expected, message) {
-  if (actual == expected) {
-    fail(actual, expected, message, '!=', assert.notEqual);
-  }
-};
-
-// 7. The equivalence assertion tests a deep equality relation.
-// assert.deepEqual(actual, expected, message_opt);
-
-assert.deepEqual = function deepEqual(actual, expected, message) {
-  if (!_deepEqual(actual, expected)) {
-    fail(actual, expected, message, 'deepEqual', assert.deepEqual);
-  }
-};
-
-function _deepEqual(actual, expected) {
-  // 7.1. All identical values are equivalent, as determined by ===.
-  if (actual === expected) {
-    return true;
-
-  } else if (Buffer.isBuffer(actual) && Buffer.isBuffer(expected)) {
-    if (actual.length != expected.length) return false;
-
-    for (var i = 0; i < actual.length; i++) {
-      if (actual[i] !== expected[i]) return false;
-    }
-
-    return true;
-
-  // 7.2. If the expected value is a Date object, the actual value is
-  // equivalent if it is also a Date object that refers to the same time.
-  } else if (actual instanceof Date && expected instanceof Date) {
-    return actual.getTime() === expected.getTime();
-
-  // 7.3. Other pairs that do not both pass typeof value == 'object',
-  // equivalence is determined by ==.
-  } else if (typeof actual != 'object' && typeof expected != 'object') {
-    return actual == expected;
-
-  // 7.4. For all other Object pairs, including Array objects, equivalence is
-  // determined by having the same number of owned properties (as verified
-  // with Object.prototype.hasOwnProperty.call), the same set of keys
-  // (although not necessarily the same order), equivalent values for every
-  // corresponding key, and an identical 'prototype' property. Note: this
-  // accounts for both named and indexed properties on Arrays.
-  } else {
-    return objEquiv(actual, expected);
-  }
-}
-
-function isUndefinedOrNull(value) {
-  return value === null || value === undefined;
-}
-
-function isArguments(object) {
-  return Object.prototype.toString.call(object) == '[object Arguments]';
-}
-
-function objEquiv(a, b) {
-  if (isUndefinedOrNull(a) || isUndefinedOrNull(b))
-    return false;
-  // an identical 'prototype' property.
-  if (a.prototype !== b.prototype) return false;
-  //~~~I've managed to break Object.keys through screwy arguments passing.
-  //   Converting to array solves the problem.
-  if (isArguments(a)) {
-    if (!isArguments(b)) {
-      return false;
-    }
-    a = pSlice.call(a);
-    b = pSlice.call(b);
-    return _deepEqual(a, b);
-  }
-  try {
-    var ka = objectKeys(a),
-        kb = objectKeys(b),
-        key, i;
-  } catch (e) {//happens when one is a string literal and the other isn't
-    return false;
-  }
-  // having the same number of owned properties (keys incorporates
-  // hasOwnProperty)
-  if (ka.length != kb.length)
-    return false;
-  //the same set of keys (although not necessarily the same order),
-  ka.sort();
-  kb.sort();
-  //~~~cheap key test
-  for (i = ka.length - 1; i >= 0; i--) {
-    if (ka[i] != kb[i])
-      return false;
-  }
-  //equivalent values for every corresponding key, and
-  //~~~possibly expensive deep test
-  for (i = ka.length - 1; i >= 0; i--) {
-    key = ka[i];
-    if (!_deepEqual(a[key], b[key])) return false;
-  }
-  return true;
-}
-
-// 8. The non-equivalence assertion tests for any deep inequality.
-// assert.notDeepEqual(actual, expected, message_opt);
-
-assert.notDeepEqual = function notDeepEqual(actual, expected, message) {
-  if (_deepEqual(actual, expected)) {
-    fail(actual, expected, message, 'notDeepEqual', assert.notDeepEqual);
-  }
-};
-
-// 9. The strict equality assertion tests strict equality, as determined by ===.
-// assert.strictEqual(actual, expected, message_opt);
-
-assert.strictEqual = function strictEqual(actual, expected, message) {
-  if (actual !== expected) {
-    fail(actual, expected, message, '===', assert.strictEqual);
-  }
-};
-
-// 10. The strict non-equality assertion tests for strict inequality, as
-// determined by !==.  assert.notStrictEqual(actual, expected, message_opt);
-
-assert.notStrictEqual = function notStrictEqual(actual, expected, message) {
-  if (actual === expected) {
-    fail(actual, expected, message, '!==', assert.notStrictEqual);
-  }
-};
-
-function expectedException(actual, expected) {
-  if (!actual || !expected) {
-    return false;
-  }
-
-  if (expected instanceof RegExp) {
-    return expected.test(actual);
-  } else if (actual instanceof expected) {
-    return true;
-  } else if (expected.call({}, actual) === true) {
-    return true;
-  }
-
-  return false;
-}
-
-function _throws(shouldThrow, block, expected, message) {
-  var actual;
-
-  if (typeof expected === 'string') {
-    message = expected;
-    expected = null;
-  }
-
-  try {
-    block();
-  } catch (e) {
-    actual = e;
-  }
-
-  message = (expected && expected.name ? ' (' + expected.name + ').' : '.') +
-            (message ? ' ' + message : '.');
-
-  if (shouldThrow && !actual) {
-    fail('Missing expected exception' + message);
-  }
-
-  if (!shouldThrow && expectedException(actual, expected)) {
-    fail('Got unwanted exception' + message);
-  }
-
-  if ((shouldThrow && actual && expected &&
-      !expectedException(actual, expected)) || (!shouldThrow && actual)) {
-    throw actual;
-  }
-}
-
-// 11. Expected to throw an error:
-// assert.throws(block, Error_opt, message_opt);
-
-assert.throws = function(block, /*optional*/error, /*optional*/message) {
-  _throws.apply(this, [true].concat(pSlice.call(arguments)));
-};
-
-// EXTENSION! This is annoying to write outside this module.
-assert.doesNotThrow = function(block, /*optional*/error, /*optional*/message) {
-  _throws.apply(this, [false].concat(pSlice.call(arguments)));
-};
-
-assert.ifError = function(err) { if (err) {throw err;}};
-
-})()
-},{"util":10,"buffer":12}],10:[function(require,module,exports){
+},{"util":10,"assert":11}],10:[function(require,module,exports){
 var events = require('events');
 
 exports.isArray = isArray;
@@ -8653,93 +8337,324 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":7}],13:[function(require,module,exports){
-(function (exports) {
-	'use strict';
+},{"events":2}],11:[function(require,module,exports){
+(function(){// UTILITY
+var util = require('util');
+var Buffer = require("buffer").Buffer;
+var pSlice = Array.prototype.slice;
 
-	var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+function objectKeys(object) {
+  if (Object.keys) return Object.keys(object);
+  var result = [];
+  for (var name in object) {
+    if (Object.prototype.hasOwnProperty.call(object, name)) {
+      result.push(name);
+    }
+  }
+  return result;
+}
 
-	function b64ToByteArray(b64) {
-		var i, j, l, tmp, placeHolders, arr;
-	
-		if (b64.length % 4 > 0) {
-			throw 'Invalid string. Length must be a multiple of 4';
-		}
+// 1. The assert module provides functions that throw
+// AssertionError's when particular conditions are not met. The
+// assert module must conform to the following interface.
 
-		// the number of equal signs (place holders)
-		// if there are two placeholders, than the two characters before it
-		// represent one byte
-		// if there is only one, then the three characters before it represent 2 bytes
-		// this is just a cheap hack to not do indexOf twice
-		placeHolders = b64.indexOf('=');
-		placeHolders = placeHolders > 0 ? b64.length - placeHolders : 0;
+var assert = module.exports = ok;
 
-		// base64 is 4/3 + up to two characters of the original data
-		arr = [];//new Uint8Array(b64.length * 3 / 4 - placeHolders);
+// 2. The AssertionError is defined in assert.
+// new assert.AssertionError({ message: message,
+//                             actual: actual,
+//                             expected: expected })
 
-		// if there are placeholders, only get up to the last complete 4 chars
-		l = placeHolders > 0 ? b64.length - 4 : b64.length;
+assert.AssertionError = function AssertionError(options) {
+  this.name = 'AssertionError';
+  this.message = options.message;
+  this.actual = options.actual;
+  this.expected = options.expected;
+  this.operator = options.operator;
+  var stackStartFunction = options.stackStartFunction || fail;
 
-		for (i = 0, j = 0; i < l; i += 4, j += 3) {
-			tmp = (lookup.indexOf(b64[i]) << 18) | (lookup.indexOf(b64[i + 1]) << 12) | (lookup.indexOf(b64[i + 2]) << 6) | lookup.indexOf(b64[i + 3]);
-			arr.push((tmp & 0xFF0000) >> 16);
-			arr.push((tmp & 0xFF00) >> 8);
-			arr.push(tmp & 0xFF);
-		}
+  if (Error.captureStackTrace) {
+    Error.captureStackTrace(this, stackStartFunction);
+  }
+};
+util.inherits(assert.AssertionError, Error);
 
-		if (placeHolders === 2) {
-			tmp = (lookup.indexOf(b64[i]) << 2) | (lookup.indexOf(b64[i + 1]) >> 4);
-			arr.push(tmp & 0xFF);
-		} else if (placeHolders === 1) {
-			tmp = (lookup.indexOf(b64[i]) << 10) | (lookup.indexOf(b64[i + 1]) << 4) | (lookup.indexOf(b64[i + 2]) >> 2);
-			arr.push((tmp >> 8) & 0xFF);
-			arr.push(tmp & 0xFF);
-		}
+function replacer(key, value) {
+  if (value === undefined) {
+    return '' + value;
+  }
+  if (typeof value === 'number' && (isNaN(value) || !isFinite(value))) {
+    return value.toString();
+  }
+  if (typeof value === 'function' || value instanceof RegExp) {
+    return value.toString();
+  }
+  return value;
+}
 
-		return arr;
-	}
+function truncate(s, n) {
+  if (typeof s == 'string') {
+    return s.length < n ? s : s.slice(0, n);
+  } else {
+    return s;
+  }
+}
 
-	function uint8ToBase64(uint8) {
-		var i,
-			extraBytes = uint8.length % 3, // if we have 1 byte left, pad 2 bytes
-			output = "",
-			temp, length;
+assert.AssertionError.prototype.toString = function() {
+  if (this.message) {
+    return [this.name + ':', this.message].join(' ');
+  } else {
+    return [
+      this.name + ':',
+      truncate(JSON.stringify(this.actual, replacer), 128),
+      this.operator,
+      truncate(JSON.stringify(this.expected, replacer), 128)
+    ].join(' ');
+  }
+};
 
-		function tripletToBase64 (num) {
-			return lookup[num >> 18 & 0x3F] + lookup[num >> 12 & 0x3F] + lookup[num >> 6 & 0x3F] + lookup[num & 0x3F];
-		};
+// assert.AssertionError instanceof Error
 
-		// go through the array every three bytes, we'll deal with trailing stuff later
-		for (i = 0, length = uint8.length - extraBytes; i < length; i += 3) {
-			temp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2]);
-			output += tripletToBase64(temp);
-		}
+assert.AssertionError.__proto__ = Error.prototype;
 
-		// pad the end with zeros, but make sure to not forget the extra bytes
-		switch (extraBytes) {
-			case 1:
-				temp = uint8[uint8.length - 1];
-				output += lookup[temp >> 2];
-				output += lookup[(temp << 4) & 0x3F];
-				output += '==';
-				break;
-			case 2:
-				temp = (uint8[uint8.length - 2] << 8) + (uint8[uint8.length - 1]);
-				output += lookup[temp >> 10];
-				output += lookup[(temp >> 4) & 0x3F];
-				output += lookup[(temp << 2) & 0x3F];
-				output += '=';
-				break;
-		}
+// At present only the three keys mentioned above are used and
+// understood by the spec. Implementations or sub modules can pass
+// other keys to the AssertionError's constructor - they will be
+// ignored.
 
-		return output;
-	}
+// 3. All of the following functions must throw an AssertionError
+// when a corresponding condition is not met, with a message that
+// may be undefined if not provided.  All assertion methods provide
+// both the actual and expected values to the assertion error for
+// display purposes.
 
-	module.exports.toByteArray = b64ToByteArray;
-	module.exports.fromByteArray = uint8ToBase64;
-}());
+function fail(actual, expected, message, operator, stackStartFunction) {
+  throw new assert.AssertionError({
+    message: message,
+    actual: actual,
+    expected: expected,
+    operator: operator,
+    stackStartFunction: stackStartFunction
+  });
+}
 
-},{}],14:[function(require,module,exports){
+// EXTENSION! allows for well behaved errors defined elsewhere.
+assert.fail = fail;
+
+// 4. Pure assertion tests whether a value is truthy, as determined
+// by !!guard.
+// assert.ok(guard, message_opt);
+// This statement is equivalent to assert.equal(true, guard,
+// message_opt);. To test strictly for the value true, use
+// assert.strictEqual(true, guard, message_opt);.
+
+function ok(value, message) {
+  if (!!!value) fail(value, true, message, '==', assert.ok);
+}
+assert.ok = ok;
+
+// 5. The equality assertion tests shallow, coercive equality with
+// ==.
+// assert.equal(actual, expected, message_opt);
+
+assert.equal = function equal(actual, expected, message) {
+  if (actual != expected) fail(actual, expected, message, '==', assert.equal);
+};
+
+// 6. The non-equality assertion tests for whether two objects are not equal
+// with != assert.notEqual(actual, expected, message_opt);
+
+assert.notEqual = function notEqual(actual, expected, message) {
+  if (actual == expected) {
+    fail(actual, expected, message, '!=', assert.notEqual);
+  }
+};
+
+// 7. The equivalence assertion tests a deep equality relation.
+// assert.deepEqual(actual, expected, message_opt);
+
+assert.deepEqual = function deepEqual(actual, expected, message) {
+  if (!_deepEqual(actual, expected)) {
+    fail(actual, expected, message, 'deepEqual', assert.deepEqual);
+  }
+};
+
+function _deepEqual(actual, expected) {
+  // 7.1. All identical values are equivalent, as determined by ===.
+  if (actual === expected) {
+    return true;
+
+  } else if (Buffer.isBuffer(actual) && Buffer.isBuffer(expected)) {
+    if (actual.length != expected.length) return false;
+
+    for (var i = 0; i < actual.length; i++) {
+      if (actual[i] !== expected[i]) return false;
+    }
+
+    return true;
+
+  // 7.2. If the expected value is a Date object, the actual value is
+  // equivalent if it is also a Date object that refers to the same time.
+  } else if (actual instanceof Date && expected instanceof Date) {
+    return actual.getTime() === expected.getTime();
+
+  // 7.3. Other pairs that do not both pass typeof value == 'object',
+  // equivalence is determined by ==.
+  } else if (typeof actual != 'object' && typeof expected != 'object') {
+    return actual == expected;
+
+  // 7.4. For all other Object pairs, including Array objects, equivalence is
+  // determined by having the same number of owned properties (as verified
+  // with Object.prototype.hasOwnProperty.call), the same set of keys
+  // (although not necessarily the same order), equivalent values for every
+  // corresponding key, and an identical 'prototype' property. Note: this
+  // accounts for both named and indexed properties on Arrays.
+  } else {
+    return objEquiv(actual, expected);
+  }
+}
+
+function isUndefinedOrNull(value) {
+  return value === null || value === undefined;
+}
+
+function isArguments(object) {
+  return Object.prototype.toString.call(object) == '[object Arguments]';
+}
+
+function objEquiv(a, b) {
+  if (isUndefinedOrNull(a) || isUndefinedOrNull(b))
+    return false;
+  // an identical 'prototype' property.
+  if (a.prototype !== b.prototype) return false;
+  //~~~I've managed to break Object.keys through screwy arguments passing.
+  //   Converting to array solves the problem.
+  if (isArguments(a)) {
+    if (!isArguments(b)) {
+      return false;
+    }
+    a = pSlice.call(a);
+    b = pSlice.call(b);
+    return _deepEqual(a, b);
+  }
+  try {
+    var ka = objectKeys(a),
+        kb = objectKeys(b),
+        key, i;
+  } catch (e) {//happens when one is a string literal and the other isn't
+    return false;
+  }
+  // having the same number of owned properties (keys incorporates
+  // hasOwnProperty)
+  if (ka.length != kb.length)
+    return false;
+  //the same set of keys (although not necessarily the same order),
+  ka.sort();
+  kb.sort();
+  //~~~cheap key test
+  for (i = ka.length - 1; i >= 0; i--) {
+    if (ka[i] != kb[i])
+      return false;
+  }
+  //equivalent values for every corresponding key, and
+  //~~~possibly expensive deep test
+  for (i = ka.length - 1; i >= 0; i--) {
+    key = ka[i];
+    if (!_deepEqual(a[key], b[key])) return false;
+  }
+  return true;
+}
+
+// 8. The non-equivalence assertion tests for any deep inequality.
+// assert.notDeepEqual(actual, expected, message_opt);
+
+assert.notDeepEqual = function notDeepEqual(actual, expected, message) {
+  if (_deepEqual(actual, expected)) {
+    fail(actual, expected, message, 'notDeepEqual', assert.notDeepEqual);
+  }
+};
+
+// 9. The strict equality assertion tests strict equality, as determined by ===.
+// assert.strictEqual(actual, expected, message_opt);
+
+assert.strictEqual = function strictEqual(actual, expected, message) {
+  if (actual !== expected) {
+    fail(actual, expected, message, '===', assert.strictEqual);
+  }
+};
+
+// 10. The strict non-equality assertion tests for strict inequality, as
+// determined by !==.  assert.notStrictEqual(actual, expected, message_opt);
+
+assert.notStrictEqual = function notStrictEqual(actual, expected, message) {
+  if (actual === expected) {
+    fail(actual, expected, message, '!==', assert.notStrictEqual);
+  }
+};
+
+function expectedException(actual, expected) {
+  if (!actual || !expected) {
+    return false;
+  }
+
+  if (expected instanceof RegExp) {
+    return expected.test(actual);
+  } else if (actual instanceof expected) {
+    return true;
+  } else if (expected.call({}, actual) === true) {
+    return true;
+  }
+
+  return false;
+}
+
+function _throws(shouldThrow, block, expected, message) {
+  var actual;
+
+  if (typeof expected === 'string') {
+    message = expected;
+    expected = null;
+  }
+
+  try {
+    block();
+  } catch (e) {
+    actual = e;
+  }
+
+  message = (expected && expected.name ? ' (' + expected.name + ').' : '.') +
+            (message ? ' ' + message : '.');
+
+  if (shouldThrow && !actual) {
+    fail('Missing expected exception' + message);
+  }
+
+  if (!shouldThrow && expectedException(actual, expected)) {
+    fail('Got unwanted exception' + message);
+  }
+
+  if ((shouldThrow && actual && expected &&
+      !expectedException(actual, expected)) || (!shouldThrow && actual)) {
+    throw actual;
+  }
+}
+
+// 11. Expected to throw an error:
+// assert.throws(block, Error_opt, message_opt);
+
+assert.throws = function(block, /*optional*/error, /*optional*/message) {
+  _throws.apply(this, [true].concat(pSlice.call(arguments)));
+};
+
+// EXTENSION! This is annoying to write outside this module.
+assert.doesNotThrow = function(block, /*optional*/error, /*optional*/message) {
+  _throws.apply(this, [false].concat(pSlice.call(arguments)));
+};
+
+assert.ifError = function(err) { if (err) {throw err;}};
+
+})()
+},{"util":10,"buffer":12}],13:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -10145,7 +10060,93 @@ SlowBuffer.prototype.writeDoubleLE = Buffer.prototype.writeDoubleLE;
 SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 })()
-},{"assert":11,"./buffer_ieee754":14,"base64-js":13}]},{},["FD4Lxs"])
+},{"assert":11,"./buffer_ieee754":13,"base64-js":14}],14:[function(require,module,exports){
+(function (exports) {
+	'use strict';
+
+	var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+	function b64ToByteArray(b64) {
+		var i, j, l, tmp, placeHolders, arr;
+	
+		if (b64.length % 4 > 0) {
+			throw 'Invalid string. Length must be a multiple of 4';
+		}
+
+		// the number of equal signs (place holders)
+		// if there are two placeholders, than the two characters before it
+		// represent one byte
+		// if there is only one, then the three characters before it represent 2 bytes
+		// this is just a cheap hack to not do indexOf twice
+		placeHolders = b64.indexOf('=');
+		placeHolders = placeHolders > 0 ? b64.length - placeHolders : 0;
+
+		// base64 is 4/3 + up to two characters of the original data
+		arr = [];//new Uint8Array(b64.length * 3 / 4 - placeHolders);
+
+		// if there are placeholders, only get up to the last complete 4 chars
+		l = placeHolders > 0 ? b64.length - 4 : b64.length;
+
+		for (i = 0, j = 0; i < l; i += 4, j += 3) {
+			tmp = (lookup.indexOf(b64[i]) << 18) | (lookup.indexOf(b64[i + 1]) << 12) | (lookup.indexOf(b64[i + 2]) << 6) | lookup.indexOf(b64[i + 3]);
+			arr.push((tmp & 0xFF0000) >> 16);
+			arr.push((tmp & 0xFF00) >> 8);
+			arr.push(tmp & 0xFF);
+		}
+
+		if (placeHolders === 2) {
+			tmp = (lookup.indexOf(b64[i]) << 2) | (lookup.indexOf(b64[i + 1]) >> 4);
+			arr.push(tmp & 0xFF);
+		} else if (placeHolders === 1) {
+			tmp = (lookup.indexOf(b64[i]) << 10) | (lookup.indexOf(b64[i + 1]) << 4) | (lookup.indexOf(b64[i + 2]) >> 2);
+			arr.push((tmp >> 8) & 0xFF);
+			arr.push(tmp & 0xFF);
+		}
+
+		return arr;
+	}
+
+	function uint8ToBase64(uint8) {
+		var i,
+			extraBytes = uint8.length % 3, // if we have 1 byte left, pad 2 bytes
+			output = "",
+			temp, length;
+
+		function tripletToBase64 (num) {
+			return lookup[num >> 18 & 0x3F] + lookup[num >> 12 & 0x3F] + lookup[num >> 6 & 0x3F] + lookup[num & 0x3F];
+		};
+
+		// go through the array every three bytes, we'll deal with trailing stuff later
+		for (i = 0, length = uint8.length - extraBytes; i < length; i += 3) {
+			temp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2]);
+			output += tripletToBase64(temp);
+		}
+
+		// pad the end with zeros, but make sure to not forget the extra bytes
+		switch (extraBytes) {
+			case 1:
+				temp = uint8[uint8.length - 1];
+				output += lookup[temp >> 2];
+				output += lookup[(temp << 4) & 0x3F];
+				output += '==';
+				break;
+			case 2:
+				temp = (uint8[uint8.length - 2] << 8) + (uint8[uint8.length - 1]);
+				output += lookup[temp >> 10];
+				output += lookup[(temp >> 4) & 0x3F];
+				output += lookup[(temp << 2) & 0x3F];
+				output += '=';
+				break;
+		}
+
+		return output;
+	}
+
+	module.exports.toByteArray = b64ToByteArray;
+	module.exports.fromByteArray = uint8ToBase64;
+}());
+
+},{}]},{},["FD4Lxs"])
 ;
 JSHINT = require('jshint').JSHINT;
 }());
