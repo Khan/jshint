@@ -236,7 +236,7 @@ var JSHINT = (function () {
 		extraModules = [],
 		emitter = new events.EventEmitter(),
         
-        hasOwnProperty = Object.prototype.hasOwnProperty;
+		hasOwnProperty = Object.prototype.hasOwnProperty;
 
 	function _has(obj, key) {
 		return hasOwnProperty.call(obj, key);
