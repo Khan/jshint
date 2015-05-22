@@ -2,7 +2,6 @@
 var window = {};
 // 2.3.0
 var JSHINT;
-var window;
 if (typeof window === 'undefined') window = {};
 (function () {
 var require;
