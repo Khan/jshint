@@ -505,6 +505,8 @@ exports.missingRadix = function (test) {
 		})
 		.test(code, {es3: true});
 
+	TestRun(test).test(code);
+
 	test.done();
 };
 
@@ -737,5 +739,33 @@ exports.testDefaultArguments = function (test) {
 		.addError(11, "Regular parameters cannot come after default parameters.")
 		.test(src, {  });
 
+	test.done();
+};
+
+// Issue #1324: Make sure that we're not mutating passed options object.
+exports.testClonePassedObjects = function (test) {
+	var options = { predef: ["sup"] };
+	JSHINT("", options);
+	test.ok(options.predef.length == 1);
+	test.done();
+};
+
+exports.testMagicProtoVariable = function (test) {
+	JSHINT("__proto__ = 1;");
+	test.done();
+};
+
+// Issue #1371: column number at end of non-strict comparison (for usability reasons)
+exports.testColumnNumAfterNonStrictComparison = function (test) {
+	var src =	"if (1 == 1) {\n" +
+				"  var foo = 2;\n" +
+				"  if (1 != 1){\n" +
+				"    var bar = 3;\n" +
+				"  }\n"+
+				"}";
+	TestRun(test)
+		.addError(1, "Expected '===' and instead saw '=='.", {character: 9})
+		.addError(3, "Expected '!==' and instead saw '!='.", {character: 11})
+		.test(src, {eqeqeq: true});
 	test.done();
 };

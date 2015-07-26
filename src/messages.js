@@ -197,7 +197,8 @@ var warnings = {
 	W119: $._("'{a}' is only available in ES6 (use esnext option)."),
 	W120: $._("You might be leaking a variable ({a}) here."),
 	W121: $._("I thought you were going to type a conditional expression but you typed an assignment instead. Maybe you meant to type === instead of =?"),
-	
+	W122: $._("Invalid typeof value '{a}'"),
+	W123: $._("'{a}' is already defined in outer scope.")
 };
 
 var info = {

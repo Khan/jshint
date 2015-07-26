@@ -30,12 +30,45 @@ exports.shadow = function (test) {
 		.addError(10, "'foo' is already defined.")
 		.test(src, {es3: true});
 
+	TestRun(test)
+		.addError(5, "'a' is already defined.")
+		.addError(10, "'foo' is already defined.")
+		.test(src, {es3: true, shadow: false });
+
+	TestRun(test)
+		.addError(5, "'a' is already defined.")
+		.addError(10, "'foo' is already defined.")
+		.test(src, {es3: true, shadow: "inner" });
+
 	// Allow variable shadowing when shadow is true
 	TestRun(test)
 		.test(src, { es3: true, shadow: true });
 
 	test.done();
 };
+
+/**
+ * Option `scopeshadow` allows you to re-define variables later in inner scopes.
+ *
+ *  E.g.:
+ *    var a = 1;
+ *    function foo() {
+ *        var a = 2;
+ *    }
+ */
+exports.scopeshadow = function (test) {
+	var src = fs.readFileSync(__dirname + "/fixtures/scope-redef.js", "utf8");
+
+	// Do not tolarate inner scope variable shadowing by default
+	TestRun(test)
+		.addError(5, "'a' is already defined in outer scope.")
+		.addError(12, "'b' is already defined in outer scope.")
+		.addError(20, "'bar' is already defined in outer scope.")
+		.addError(26, "'foo' is already defined.")
+		.test(src, { es3: true, shadow: "outer" });
+
+	test.done();
+}
 
 /**
  * Option `latedef` allows you to prohibit the use of variable before their
@@ -71,7 +104,6 @@ exports.latedef = function (test) {
 	// When latedef is true, JSHint must not tolerate the use before definition
 	TestRun(test)
 		.addError(10, "'vr' was used before it was defined.")
-		.addError(18, "Inner functions should be listed at the top of the outer function.")
 		.test(src, { es3: true, latedef: "nofunc" });
 
 	// When latedef_func is true, JSHint must not tolerate the use before definition for functions
@@ -84,6 +116,22 @@ exports.latedef = function (test) {
 
 	test.done();
 };
+
+exports.notypeof = function (test) {
+	var src = fs.readFileSync(__dirname + '/fixtures/typeofcomp.js', 'utf8');
+
+	TestRun(test)
+		.addError(1, "Invalid typeof value 'funtion'")
+		.addError(2, "Invalid typeof value 'double'")
+		.addError(3, "Invalid typeof value 'bool'")
+		.addError(4, "Invalid typeof value 'obj'")
+		.test(src);
+
+	TestRun(test)
+		.test(src, { notypeof: true });
+
+	test.done();
+}
 
 exports['combination of latedef and undef'] = function (test) {
 	var src = fixture('latedefundef.js');
@@ -473,14 +521,16 @@ exports.undef = function (test) {
 exports.unused = function (test) {
 	var src = fs.readFileSync(__dirname + '/fixtures/unused.js', 'utf8');
 
-	TestRun(test).test(src, { es3: true });
+	TestRun(test).test(src, { esnext: true });
 
 	var var_errors = [
 		[1, "'a' is defined but never used."],
 		[7, "'c' is defined but never used."],
 		[15, "'foo' is defined but never used."],
 		[20, "'bar' is defined but never used."],
-		[22, "'i' is defined but never used."]
+		[22, "'i' is defined but never used."],
+		[36, "'cc' is defined but never used."],
+		[39, "'dd' is defined but never used."]
 	];
 
 	var last_param_errors = [
@@ -499,14 +549,14 @@ exports.unused = function (test) {
 		[28, "'c' is defined but never used."]
 	];
 
-	var true_run = TestRun(test, {es3: true});
+	var true_run = TestRun(test, {esnext: true});
 
 	var_errors.concat(last_param_errors).forEach(function (e) {
 		true_run.addError.apply(true_run, e);
 	});
 
-	true_run.test(src, { unused: true });
-	test.ok(!JSHINT(src, { es3: true, unused: true }));
+	true_run.test(src, { esnext: true, unused: true });
+	test.ok(!JSHINT(src, { esnext: true, unused: true }));
 
 	// Test checking all function params via unused="strict"
 	var all_run = TestRun(test);
@@ -514,15 +564,15 @@ exports.unused = function (test) {
 		all_run.addError.apply(true_run, e);
 	});
 
-	all_run.test(src, { es3: true, unused: "strict"});
+	all_run.test(src, { esnext: true, unused: "strict"});
 
 	// Test checking everything except function params
 	var vars_run = TestRun(test);
 	var_errors.forEach(function (e) { vars_run.addError.apply(vars_run, e); });
-	vars_run.test(src, { unused: "vars"});
+	vars_run.test(src, { esnext: true, unused: "vars"});
 
 	var unused = JSHINT.data().unused;
-	test.equal(10, unused.length);
+	test.equal(12, unused.length);
 	test.ok(unused.some(function (err) { return err.line === 1 && err.name === "a"; }));
 	test.ok(unused.some(function (err) { return err.line === 6 && err.name === "f"; }));
 	test.ok(unused.some(function (err) { return err.line === 7 && err.name === "c"; }));
@@ -725,7 +775,7 @@ exports.supernew = function (test) {
 	var src = fs.readFileSync(__dirname + '/fixtures/supernew.js', 'utf8');
 
 	TestRun(test)
-		.addError(1, "Weird construction. Is 'new' unnecessary?")
+		.addError(1, "Weird construction. Is 'new' necessary?")
 		.addError(9, "Missing '()' invoking a constructor.", { character: 1 })
 		.addError(11, "Missing '()' invoking a constructor.", {
 			character: 13
@@ -1073,6 +1123,11 @@ exports.globalstrict = function (test) {
 	// Don't enforce "use strict"; if strict has been explicitly set to false
 	TestRun(test).test(code[1], { es3: true, globalstrict: true, strict: false });
 
+	// Check that we can detect missing directives in files without functions
+	TestRun(test)
+		.addError(1, 'Missing "use strict" statement.')
+		.test(["var a = 1;", "a += 1;"], { globalstrict: true, strict: true });
+
 	test.done();
 };
 
@@ -1205,6 +1260,26 @@ exports.indentation = function (test) {
 		.addError(7, "Expected '}' to have an indentation at 3 instead at 5.")
 		.test(src, { es3: true, indent: 2 });
 
+	// case indent
+	TestRun(test)
+		.addError(5, "Mixed spaces and tabs.")
+		.addError(6, "Mixed spaces and tabs.")
+		.addError(10, "Unexpected space after 'hello'.")
+		.addError(11, "Unexpected space after '('.")
+		.addError(11, "Unexpected space after 'Hello World'.")
+		.test(src, { es3: true, indent: 4, white: true });
+
+	test.done();
+};
+
+exports.switchindent = function (test) {
+	var src = fs.readFileSync(__dirname + "/fixtures/switchindent.js", "utf8");
+
+	TestRun(test)
+		.addError(14, "Expected 'x' to have an indentation at 9 instead at 5.")
+		.addError(24, "Expected 'case' to have an indentation at 1 instead at 5.")
+		.test(src, { indent: 4, white: true });
+
 	test.done();
 };
 
@@ -1290,6 +1365,8 @@ exports.scope = function (test) {
 		.addError(27, "'bb' used out of scope.")
 		.addError(37, "'cc' is not defined.")
 		.addError(42, "'bb' is not defined.")
+		.addError(53, "'xx' used out of scope.")
+		.addError(54, "'yy' used out of scope.")
 		.test(src, {es3: true});
 
 	TestRun(test, 2)
@@ -1347,6 +1424,10 @@ exports.maxlen = function (test) {
 
 	TestRun(test)
 		.addError(3, "Line is too long.")
+		.addError(4, "Line is too long.")
+		.addError(5, "Line is too long.")
+		.addError(6, "Line is too long.")
+		// line 7 and more are exceptions and won't trigger the error
 		.test(src, { es3: true, maxlen: 23 });
 
 	test.done();
@@ -1623,6 +1704,23 @@ exports.unignored = function (test) {
 	TestRun(test)
 		.addError(5, "A leading decimal point can be confused with a dot: '.12'.")
 		.test(src, { es3: true });
+
+	test.done();
+};
+
+/*
+* Tests the `freeze` option -- Warn if native object prototype is assigned to.
+*/
+exports.freeze = function (test) {
+	var src = fs.readFileSync(__dirname + "/fixtures/nativeobject.js", "utf-8");
+
+	TestRun(test)
+		.addError(3, "Extending prototype of native object: 'Array'.")
+		.addError(13, "Extending prototype of native object: 'Boolean'.")
+		.test(src, { freeze: true });
+
+	TestRun(test)
+		.test(src);
 
 	test.done();
 };

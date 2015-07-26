@@ -1,6 +1,6 @@
 {
 	"name":     "jshint",
-	"version":  "2.1.11",
+	"version":  "2.4.0",
 	"homepage": "http://jshint.com/",
 	"description": "Static analysis tool for JavaScript",
 
@@ -24,6 +24,7 @@
 	},
 
 	"scripts": {
+		"data": "node scripts/generate-identifier-data",
 		"build": "node bin/build",
 		"test": "nodeunit tests tests/regression tests/unit",
 		"pretest": "jshint src"
@@ -32,19 +33,23 @@
 	"main": "./src/jshint.js",
 
 	"dependencies": {
-		"shelljs":    "0.1.x",
-		"cli":        "0.4.x",
-		"minimatch":  "0.x.x",
+		"shelljs":     "0.1.x",
+		"underscore":  "1.4.x",
+		"cli":         "0.4.x",
+		"minimatch":   "0.x.x",
+		"htmlparser2": "3.3.x",
 		"console-browserify": "0.1.x"
 	},
 
 	"devDependencies": {
-		"jshint":     "2.1.x",
-		"shelljs":    "0.1.x",
-		"browserify": "2.12.x",
-		"coveraje":   "0.2.x",
-		"nodeunit":   "0.8.x",
-		"sinon":      "1.7.x"
+		"jshint":        "2.4.x",
+		"shelljs":       "0.1.x",
+		"browserify":    "3.x",
+		"coveraje":      "0.2.x",
+		"nodeunit":      "0.8.x",
+		"sinon":         "1.7.x",
+		"unicode-6.3.0": "0.1.x",
+		"regenerate":    "0.5.x"
 	},
 
 	"jshintConfig": {
@@ -72,6 +77,7 @@
 
 	"files": [
 		"bin",
-		"src"
+		"src",
+		"data"
 	]
 }
